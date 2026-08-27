@@ -1,4 +1,4 @@
-"""Entry point placeholder. Pipeline wiring will be added in a later step."""
+"""Entry point: run the ingestion pipeline that loads PDFs and writes a graph to Neo4j."""
 from __future__ import annotations
 
 import logging
@@ -6,6 +6,7 @@ import sys
 
 from graph_rag.config import ConfigError, load_settings
 from graph_rag.logging_config import setup_logging
+from graph_rag.pipeline import run_ingestion_pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,12 @@ def main() -> int:
         return 1
 
     setup_logging(settings.log_level)
-    logger.info("Configuration loaded successfully. Pipeline not implemented yet.")
+    counts = run_ingestion_pipeline(settings)
+    logger.info(
+        "Ingestion complete. Neo4j now has %d node(s) and %d relationship(s).",
+        counts["nodes"],
+        counts["relationships"],
+    )
     return 0
 
 
