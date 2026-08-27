@@ -1,0 +1,20 @@
+# Environment / secrets
+.env
+
+# Virtual environments
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# OS / editor
+.vscode/
+.DS_Store
+
+# Local data (keep the folder structure via .gitkeep)
+data/documents/*
+!data/documents/.gitkeep
