@@ -37,6 +37,8 @@ class Settings:
     chunk_size: int
     chunk_overlap: int
 
+    retrieval_top_k: int
+
     log_level: str
 
 
@@ -52,6 +54,7 @@ def load_settings() -> Settings:
         documents_dir=os.getenv("DOCUMENTS_DIR", "data/documents"),
         chunk_size=int(os.getenv("CHUNK_SIZE", "1000")),
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "200")),
+        retrieval_top_k=int(os.getenv("RETRIEVAL_TOP_K", "5")),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
     )
     logger.debug("Settings loaded: %s", _redact(settings))
