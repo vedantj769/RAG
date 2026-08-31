@@ -25,9 +25,16 @@ _ENTITY_EXTRACTION_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You extract entity names (people, organizations, places, products, and "
-            "other concepts) mentioned in a user question. List each entity exactly "
-            "as it appears in the question.",
+            "You identify the key named entities (people, organizations, places, "
+            "products, or specific named concepts) that a question is asking about. "
+            "Write each entity using its full, canonical name as it would appear in a "
+            "reference document - resolve nicknames/initials to full names if the "
+            "question makes them clear, and use consistent capitalization. Do not "
+            "include generic terms, question words, or pronouns with no clear "
+            "referent. If the question names no specific entity, return an empty list.\n\n"
+            "Example:\n"
+            'Question: "What prize did Marie curie win in 1903?"\n'
+            'Entities: ["Marie Curie"]',
         ),
         ("human", "{question}"),
     ]
@@ -65,8 +72,9 @@ def extract_entities(llm: BaseLanguageModel, question: str) -> list[str]:
     chain = _ENTITY_EXTRACTION_PROMPT | llm.with_structured_output(ExtractedEntities)
     result = chain.invoke({"question": question})
     names = result.names if isinstance(result, ExtractedEntities) else []
-    logger.debug("Extracted entities from question: %s", names)
-    return names
+    deduped = list(dict.fromkeys(name.strip() for name in names if name and name.strip()))
+    logger.debug("Extracted entities from question: %s", deduped)
+    return deduped
 
 
 def _to_fulltext_query(entity: str) -> str:
@@ -76,56 +84,100 @@ def _to_fulltext_query(entity: str) -> str:
     return " AND ".join(f"{word}~2" for word in words)
 
 
-def structured_retriever(graph: Neo4jGraph, llm: BaseLanguageModel, question: str, limit: int = 5) -> str:
-    """Return newline-separated relationship triples for entities mentioned in the question."""
-    triples: list[str] = []
-    for entity in extract_entities(llm, question):
-        fulltext_query = _to_fulltext_query(entity)
-        if not fulltext_query:
-            continue
+def _match_entity_ids(graph: Neo4jGraph, entity: str, limit: int) -> list[str]:
+    """Find the `id`(s) of graph entities matching a name, ranked by full-text relevance.
 
+    Falls back to a case-insensitive substring match when the fuzzy full-text search
+    finds nothing (e.g. for very short names, or names with unusual punctuation).
+    """
+    fulltext_query = _to_fulltext_query(entity)
+    if fulltext_query:
         rows = graph.query(
             """
             CALL db.index.fulltext.queryNodes($index_name, $query, {limit: $limit})
-            YIELD node
+            YIELD node, score
+            RETURN node.id AS id
+            ORDER BY score DESC
+            """,
+            {"index_name": ENTITY_FULLTEXT_INDEX, "query": fulltext_query, "limit": limit},
+        )
+        ids = [row["id"] for row in rows]
+        if ids:
+            return ids
+
+    rows = graph.query(
+        "MATCH (node:__Entity__) WHERE toLower(node.id) CONTAINS toLower($entity) "
+        "RETURN node.id AS id LIMIT $limit",
+        {"entity": entity, "limit": limit},
+    )
+    return [row["id"] for row in rows]
+
+
+def _match_entities(graph: Neo4jGraph, entities: list[str], limit: int) -> list[str]:
+    """Resolve extracted entity names to graph node ids, deduplicated and order-preserved."""
+    node_ids: list[str] = []
+    for entity in entities:
+        node_ids.extend(_match_entity_ids(graph, entity, limit))
+    return list(dict.fromkeys(node_ids))
+
+
+def _format_triple(source: str, source_type: str | None, rel: str, target: str, target_type: str | None) -> str:
+    """Render a relationship as a readable triple, including entity types when known."""
+    source_label = f"{source} ({source_type})" if source_type else source
+    target_label = f"{target} ({target_type})" if target_type else target
+    return f"{source_label} - {rel} -> {target_label}"
+
+
+def structured_retriever(graph: Neo4jGraph, node_ids: list[str], limit: int = 5) -> str:
+    """Return newline-separated relationship triples for the given graph entity ids."""
+    triples: list[str] = []
+    for node_id in node_ids:
+        rows = graph.query(
+            """
+            MATCH (node:__Entity__ {id: $node_id})
             CALL {
                 WITH node
                 MATCH (node)-[r]->(neighbor)
                 WHERE type(r) <> 'MENTIONS'
-                RETURN node.id + ' - ' + type(r) + ' -> ' + neighbor.id AS output
+                RETURN node.id AS source,
+                       [l IN labels(node) WHERE l <> '__Entity__'][0] AS source_type,
+                       type(r) AS rel,
+                       neighbor.id AS target,
+                       [l IN labels(neighbor) WHERE l <> '__Entity__'][0] AS target_type
                 UNION ALL
                 WITH node
                 MATCH (node)<-[r]-(neighbor)
                 WHERE type(r) <> 'MENTIONS'
-                RETURN neighbor.id + ' - ' + type(r) + ' -> ' + node.id AS output
+                RETURN neighbor.id AS source,
+                       [l IN labels(neighbor) WHERE l <> '__Entity__'][0] AS source_type,
+                       type(r) AS rel,
+                       node.id AS target,
+                       [l IN labels(node) WHERE l <> '__Entity__'][0] AS target_type
             }
-            RETURN DISTINCT output
+            RETURN DISTINCT source, source_type, rel, target, target_type
             LIMIT $limit
             """,
-            {"index_name": ENTITY_FULLTEXT_INDEX, "query": fulltext_query, "limit": limit},
+            {"node_id": node_id, "limit": limit},
         )
-        triples.extend(row["output"] for row in rows)
+        triples.extend(
+            _format_triple(row["source"], row["source_type"], row["rel"], row["target"], row["target_type"])
+            for row in rows
+        )
 
-    return "\n".join(triples)
+    return "\n".join(dict.fromkeys(triples))
 
 
-def source_text_retriever(graph: Neo4jGraph, llm: BaseLanguageModel, question: str, limit: int = 3) -> str:
-    """Return source chunk text from Document nodes that mention entities in the question."""
+def source_text_retriever(graph: Neo4jGraph, node_ids: list[str], limit: int = 3) -> str:
+    """Return source chunk text from Document nodes that mention the given graph entity ids."""
     chunks: list[str] = []
-    for entity in extract_entities(llm, question):
-        fulltext_query = _to_fulltext_query(entity)
-        if not fulltext_query:
-            continue
-
+    for node_id in node_ids:
         rows = graph.query(
             """
-            CALL db.index.fulltext.queryNodes($index_name, $query, {limit: 3})
-            YIELD node
-            MATCH (doc:Document)-[:MENTIONS]->(node)
+            MATCH (doc:Document)-[:MENTIONS]->(node:__Entity__ {id: $node_id})
             RETURN DISTINCT doc.text AS text
             LIMIT $limit
             """,
-            {"index_name": ENTITY_FULLTEXT_INDEX, "query": fulltext_query, "limit": limit},
+            {"node_id": node_id, "limit": limit},
         )
         chunks.extend(row["text"] for row in rows if row["text"])
 
@@ -134,8 +186,14 @@ def source_text_retriever(graph: Neo4jGraph, llm: BaseLanguageModel, question: s
 
 def retrieve_context(graph: Neo4jGraph, llm: BaseLanguageModel, question: str, limit: int = 5) -> str:
     """Combine graph relationship triples and source chunk text into one context string."""
-    relationships = structured_retriever(graph, llm, question, limit)
-    source_text = source_text_retriever(graph, llm, question, limit)
+    entities = extract_entities(llm, question)
+    node_ids = _match_entities(graph, entities, limit)
+    if not node_ids:
+        logger.warning("No graph entities matched for question: %s (entities: %s)", question, entities)
+        return ""
+
+    relationships = structured_retriever(graph, node_ids, limit)
+    source_text = source_text_retriever(graph, node_ids, limit)
 
     sections = []
     if relationships:
