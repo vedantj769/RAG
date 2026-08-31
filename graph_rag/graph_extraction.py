@@ -11,9 +11,27 @@ from langchain_neo4j.graphs.graph_document import GraphDocument
 logger = logging.getLogger(__name__)
 
 
-def build_graph_transformer(llm: BaseLanguageModel) -> LLMGraphTransformer:
-    """Create an LLMGraphTransformer bound to the given LLM."""
-    return LLMGraphTransformer(llm=llm)
+def build_graph_transformer(
+    llm: BaseLanguageModel,
+    allowed_nodes: list[str] | None = None,
+    allowed_relationships: list[tuple[str, str, str]] | None = None,
+    node_properties: bool | list[str] = False,
+    additional_instructions: str = "",
+) -> LLMGraphTransformer:
+    """Create an LLMGraphTransformer bound to the given LLM.
+
+    Passing `allowed_nodes`/`allowed_relationships` constrains extraction to a fixed
+    schema (see `graph_rag.schemas`); `node_properties=True` lets the LLM also extract
+    named properties per node (e.g. a Formula's `expression`), which is required for
+    those properties to end up in Neo4j and be retrievable later.
+    """
+    return LLMGraphTransformer(
+        llm=llm,
+        allowed_nodes=allowed_nodes or [],
+        allowed_relationships=allowed_relationships or [],
+        node_properties=node_properties,
+        additional_instructions=additional_instructions,
+    )
 
 
 def extract_graph_documents(
