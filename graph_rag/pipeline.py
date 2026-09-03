@@ -5,10 +5,10 @@ import logging
 
 from graph_rag.chunking import split_documents
 from graph_rag.config import Settings
-from graph_rag.graph_extraction import build_graph_transformer, extract_graph_documents
 from graph_rag.llm import build_groq_llm
 from graph_rag.loader import load_pdf_documents
 from graph_rag.neo4j_store import build_neo4j_graph, verify_graph_written, write_graph_documents
+from graph_rag.skill_extraction import extract_with_skills
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +19,7 @@ def run_ingestion_pipeline(settings: Settings) -> dict[str, int]:
     chunks = split_documents(documents, settings.chunk_size, settings.chunk_overlap)
 
     llm = build_groq_llm(settings.groq_api_key, settings.groq_model)
-    transformer = build_graph_transformer(llm)
-    graph_documents = extract_graph_documents(transformer, chunks)
+    graph_documents = extract_with_skills(llm, chunks)
 
     graph = build_neo4j_graph(
         settings.neo4j_uri,
@@ -33,3 +32,4 @@ def run_ingestion_pipeline(settings: Settings) -> dict[str, int]:
         return verify_graph_written(graph)
     finally:
         graph.close()
+
