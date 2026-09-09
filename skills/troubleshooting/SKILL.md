@@ -6,11 +6,15 @@ allowed_nodes:
   - KPI
   - Table
   - BusinessRule
+  - SOP
+  - Query
 allowed_relationships:
   - [KnowledgeType, HAS_CASE, TroubleshootingCase]
   - [TroubleshootingCase, AFFECTS, KPI]
   - [TroubleshootingCase, AFFECTS, Table]
   - [TroubleshootingCase, RELATED_TO, BusinessRule]
+  - [TroubleshootingCase, RESOLVED_BY, SOP]
+  - [TroubleshootingCase, DIAGNOSED_VIA, Query]
 ---
 
 ## Extraction Prompt
@@ -29,6 +33,11 @@ Names, Source Reference, Business Notes. When extracting the graph:
   that is clearly one of these, create/reference that node using the EXACT
   same name text the owning skill (kpi_definition / data_model /
   business_rule) would use for it, so they merge instead of duplicating.
+- SOP / Query: when the Corrective Action names or clearly matches an
+  existing SOP/Procedure, or a Diagnostic Check names or clearly matches an
+  existing Data Query Definition, create/reference those nodes using the
+  EXACT same name text the sop_procedure / data_query_definition skills
+  would use for them.
 
 Relationships to create:
 - (KnowledgeType)-[:HAS_CASE]->(TroubleshootingCase)
@@ -38,6 +47,12 @@ Relationships to create:
   in a specific table.
 - (TroubleshootingCase)-[:RELATED_TO]->(BusinessRule): when a rule governs
   how the symptom/case is classified or handled.
+- (TroubleshootingCase)-[:RESOLVED_BY]->(SOP): a direct shortcut edge so the
+  procedure that resolves this case is one hop away instead of only living
+  in the free-text `corrective_action` property.
+- (TroubleshootingCase)-[:DIAGNOSED_VIA]->(Query): a direct shortcut edge so
+  the exact query to run for a diagnostic check is one hop away instead of
+  only living in the free-text `diagnostic_checks` property.
 
 Only use the node and relationship types provided in the schema — do not
 invent new ones. Preserve exact symptom/cause/action text as written.
@@ -46,7 +61,8 @@ invent new ones. Preserve exact symptom/cause/action text as written.
 
 Node ids are prefixed by type, e.g.
 troubleshootingcase:machine_not_running, kpi:oee,
-table:shift_oee_details_for_workcenter, businessrule:oee_aggregation_rule.
+table:shift_oee_details_for_workcenter, businessrule:oee_aggregation_rule,
+sop:unplanned_stop_handling, query:shift_oee_lookup.
 `id` is the ONLY property guaranteed to exist on every node — named
 properties were invented per-node by the extraction LLM and are only present
 on SOME nodes of a label, never all of them. Check the {schema} block above
@@ -57,6 +73,8 @@ Key properties that MAY appear per label (use only if present in {schema}):
   KPI                 -> knowledge_name, kpi_name, business_purpose, description
   Table               -> model_name, business_name, description, database, schema
   BusinessRule        -> rule_name, condition, description
+  SOP                 -> purpose, applicable_area, expected_outcome
+  Query               -> business_question, business_purpose, data_source, calculation_rule
   KnowledgeType       -> name
 
 Always anchor the match on `id` first, then OR in any named properties from
@@ -70,11 +88,16 @@ Relationships:
   (TroubleshootingCase)-[:AFFECTS]->(KPI)
   (TroubleshootingCase)-[:AFFECTS]->(Table)
   (TroubleshootingCase)-[:RELATED_TO]->(BusinessRule)
+  (TroubleshootingCase)-[:RESOLVED_BY]->(SOP)
+  (TroubleshootingCase)-[:DIAGNOSED_VIA]->(Query)
 
 KPI, Table and BusinessRule nodes here are the SAME nodes the kpi_definition,
 data_model and business_rule skills extract (same label + same `id`
 convention) — so a question like "why is OEE dropping" anchors on the KPI
-node and reaches whichever troubleshooting case affects it.
+node and reaches whichever troubleshooting case affects it. RESOLVED_BY and
+DIAGNOSED_VIA are direct shortcut edges (not bridge-node hops) — they exist
+so "what's the fix for this case" or "what query diagnoses this case"
+resolves in ONE hop instead of only living in free-text properties.
 
 Never hand-pick individual relationships to traverse based on the wording of
 the question. Any question that identifies a specific entity (a

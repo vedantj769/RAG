@@ -1,6 +1,7 @@
 """Load PDF documents from the configured documents directory."""
 from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 
@@ -68,6 +69,63 @@ def load_docx_documents(documents_dir: str) -> list[Document]:
 
     logger.info("Loaded %d DOCX file(s)", len(documents))
     return documents
+
+
+def load_chunk_export(path: str) -> list[Document]:
+    """Load a pre-chunked, pre-classified JSON export (one entry per source table:
+    chunk_index, knowledge_type, section_heading, table_index, headers, records).
+
+    Unlike `load_docx_documents` + `split_by_headings`/`split_by_top_level_sections`,
+    each entry here already carries its own `knowledge_type` - matching a
+    `skills/<knowledge_type>/SKILL.md` folder name - so no LLM routing call is needed;
+    callers can group the returned Documents by `metadata["knowledge_type"]` directly.
+
+    Entries are merged by `(section_heading, knowledge_type)` (preserving order of
+    first appearance) before being rendered, since one knowledge item is often split
+    across multiple table entries in the export (e.g. a data_model's metadata block
+    and its field-breakdown table are two entries with the same heading/type but
+    different `table_index` - they must land in ONE chunk, same reasoning as
+    `split_by_headings` for DOCX content).
+    """
+    file_path = Path(path)
+    if not file_path.is_file():
+        raise FileNotFoundError(f"Chunk export file not found: {file_path}")
+
+    chunks = json.loads(file_path.read_text(encoding="utf-8"))
+
+    grouped: dict[tuple[str, str], list[str]] = {}
+    for chunk in chunks:
+        key = (chunk.get("section_heading", ""), chunk.get("knowledge_type", ""))
+        grouped.setdefault(key, []).append(
+            _render_chunk_table(chunk.get("headers", []), chunk.get("records", []))
+        )
+
+    documents = [
+        Document(
+            page_content="\n".join([f"# {heading}"] + blocks),
+            metadata={"source": str(file_path), "knowledge_type": knowledge_type, "heading": heading},
+        )
+        for (heading, knowledge_type), blocks in grouped.items()
+    ]
+    logger.info("Loaded %d chunk(s) from %d table entr(y/ies) in %s", len(documents), len(chunks), file_path)
+    return documents
+
+
+def _render_chunk_table(headers: list[str], records: list[dict]) -> str:
+    """Render one chunk-export table entry as text, mirroring `_docx_to_text`'s
+    conventions: 2-column tables become `key: value` lines (using each row's own
+    first-column value as the key, e.g. "KPI Name: OEE"); wider tables include the
+    header row once, then each row's values `|`-joined, so column meaning isn't lost.
+    """
+    if not records:
+        return "\n".join(headers)
+
+    if len(headers) == 2:
+        return "\n".join(f"{record.get(headers[0], '')}: {record.get(headers[1], '')}" for record in records)
+
+    lines = [" | ".join(headers)]
+    lines.extend(" | ".join(str(record.get(h, "")) for h in headers) for record in records)
+    return "\n".join(lines)
 
 
 def _docx_to_text(path: Path) -> str:

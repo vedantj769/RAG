@@ -1,0 +1,2248 @@
+[
+  {
+    "chunk_index": 0,
+    "knowledge_type": "domain_concept",
+    "section_heading": "EdgeOps Knowledge",
+    "headers": [
+      "Knowledge Purpose\nAn industrial data architecture that provides a  single, centralized, real-time source of truth fordata across the enterprise."
+    ],
+    "records": []
+  },
+  {
+    "chunk_index": 1,
+    "knowledge_type": "domain_concept",
+    "section_heading": "EdgeOps Knowledge",
+    "headers": [
+      "Knowledge Pack Information",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Knowledge Pack Information": "Knowledge Pack / Domain",
+        "Entry": "EdgeOps"
+      },
+      {
+        "Knowledge Pack Information": "Product / Application",
+        "Entry": "EdgeOps"
+      },
+      {
+        "Knowledge Pack Information": "Business Area",
+        "Entry": "Industrial Data / Production"
+      },
+      {
+        "Knowledge Pack Information": "Prepared By",
+        "Entry": "FactoryIQ Knowledge Preparation"
+      },
+      {
+        "Knowledge Pack Information": "Status",
+        "Entry": "Draft"
+      },
+      {
+        "Knowledge Pack Information": "Source",
+        "Entry": "Supplied EdgeOps knowledge source"
+      }
+    ]
+  },
+  {
+    "chunk_index": 2,
+    "knowledge_type": "training_reference",
+    "section_heading": "1. Knowledge Summary",
+    "headers": [
+      "Knowledge Type",
+      "Knowledge Name",
+      "Purpose"
+    ],
+    "records": [
+      {
+        "Knowledge Type": "KPI Definition",
+        "Knowledge Name": "OEE",
+        "Purpose": "Overall Equipment Effectiveness and its components"
+      },
+      {
+        "Knowledge Type": "KPI Definition",
+        "Knowledge Name": "Availability",
+        "Purpose": "OEE Availability component"
+      },
+      {
+        "Knowledge Type": "KPI Definition",
+        "Knowledge Name": "Performance",
+        "Purpose": "OEE Performance component"
+      },
+      {
+        "Knowledge Type": "KPI Definition",
+        "Knowledge Name": "Quality",
+        "Purpose": "OEE Quality component"
+      },
+      {
+        "Knowledge Type": "Data Model",
+        "Knowledge Name": "Shift OEE Details for WorkCenter",
+        "Purpose": "Shift-level production and OEE data"
+      },
+      {
+        "Knowledge Type": "Data Model",
+        "Knowledge Name": "Hourly OEE Details for WorkCenter",
+        "Purpose": "Hourly production and OEE data"
+      },
+      {
+        "Knowledge Type": "Data Model",
+        "Knowledge Name": "Downtime Details for WorkCenter",
+        "Purpose": "Downtime event history"
+      },
+      {
+        "Knowledge Type": "Business Rule",
+        "Knowledge Name": "OEE Aggregation Rule",
+        "Purpose": "Controls aggregation across multiple shifts/periods"
+      },
+      {
+        "Knowledge Type": "Data Query Definition",
+        "Knowledge Name": "Shift OEE Lookup",
+        "Purpose": "Retrieve stored shift-level OEE"
+      },
+      {
+        "Knowledge Type": "Data Query Definition",
+        "Knowledge Name": "Shift-Day OEE Summary",
+        "Purpose": "Aggregate and recalculate daily OEE"
+      },
+      {
+        "Knowledge Type": "Data Query Definition",
+        "Knowledge Name": "Weekly OEE Summary",
+        "Purpose": "Aggregate and recalculate weekly OEE"
+      },
+      {
+        "Knowledge Type": "Data Query Definition",
+        "Knowledge Name": "Benchmark OEE Trend Lookup",
+        "Purpose": "Retrieve current benchmark snapshot"
+      },
+      {
+        "Knowledge Type": "Data Query Definition",
+        "Knowledge Name": "Hourly OEE Lookup",
+        "Purpose": "Retrieve hourly OEE"
+      },
+      {
+        "Knowledge Type": "Data Query Definition",
+        "Knowledge Name": "Downtime Lookup",
+        "Purpose": "Retrieve downtime events and summaries"
+      },
+      {
+        "Knowledge Type": "Domain Concept",
+        "Knowledge Name": "WorkCenter",
+        "Purpose": "Manufacturing equipment/work center identifier"
+      },
+      {
+        "Knowledge Type": "Domain Concept",
+        "Knowledge Name": "ShiftDay",
+        "Purpose": "Operational day for a work center shift"
+      },
+      {
+        "Knowledge Type": "Domain Concept",
+        "Knowledge Name": "ShiftName",
+        "Purpose": "Shift identifier"
+      },
+      {
+        "Knowledge Type": "Domain Concept",
+        "Knowledge Name": "HBMOEE / LBMOEE",
+        "Purpose": "High/low benchmark OEE snapshots"
+      }
+    ]
+  },
+  {
+    "chunk_index": 3,
+    "knowledge_type": "kpi_definition",
+    "section_heading": "2.1 OEE",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "OEE"
+      },
+      {
+        "Field": "KPI Name",
+        "Entry": "OEE (Overall Equipment Effectiveness)"
+      },
+      {
+        "Field": "Description",
+        "Entry": "Overall Equipment Effectiveness for a work center / machine."
+      },
+      {
+        "Field": "Business Purpose",
+        "Entry": "Monitor operational performance and production effectiveness."
+      },
+      {
+        "Field": "Formula",
+        "Entry": "Availability_ratio × Performance_ratio × Quality_ratio × 100"
+      },
+      {
+        "Field": "Unit",
+        "Entry": "%"
+      },
+      {
+        "Field": "Calculation Frequency",
+        "Entry": "Shift; Hourly; aggregated day/week/month/custom range"
+      },
+      {
+        "Field": "Applicable Hierarchy",
+        "Entry": "WorkCenter / Machine; ShiftDay; ShiftName; Hour"
+      },
+      {
+        "Field": "Source Data",
+        "Entry": "tOEEShiftDetailsForWorkCenter; tOEEHourlyDetailsForWorkCenter"
+      },
+      {
+        "Field": "Calculation Rules",
+        "Entry": "For single shift/hour use stored values. For multi-shift/day/week/month/custom range aggregate base measures and recompute."
+      },
+      {
+        "Field": "Exceptions / Exclusions",
+        "Entry": "Do not use AVG(OEE) for aggregated reporting."
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "Availability; Performance; Quality; OEE Aggregation Rule"
+      },
+      {
+        "Field": "Source Reference",
+        "Entry": "Supplied EdgeOps knowledge source"
+      }
+    ]
+  },
+  {
+    "chunk_index": 4,
+    "knowledge_type": "kpi_definition",
+    "section_heading": "2.2 Availability",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Availability"
+      },
+      {
+        "Field": "KPI Name",
+        "Entry": "Availability"
+      },
+      {
+        "Field": "Description",
+        "Entry": "OEE Availability component, calculated by MES."
+      },
+      {
+        "Field": "Business Purpose",
+        "Entry": "Measure productive operating time relative to net available production time."
+      },
+      {
+        "Field": "Formula",
+        "Entry": "IF NetAvailableTimeInSec = 0 THEN 0 ELSE (OperatingTimeInSec / NetAvailableTimeInSec) × 100"
+      },
+      {
+        "Field": "Unit",
+        "Entry": "%"
+      },
+      {
+        "Field": "Source Data",
+        "Entry": "OperatingTimeInSec; NetAvailableTimeInSec"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "OEE; Shift OEE Details for WorkCenter; Hourly OEE Details for WorkCenter; OEE Aggregation Rule"
+      }
+    ]
+  },
+  {
+    "chunk_index": 5,
+    "knowledge_type": "kpi_definition",
+    "section_heading": "2.3 Performance",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Performance"
+      },
+      {
+        "Field": "KPI Name",
+        "Entry": "Performance"
+      },
+      {
+        "Field": "Description",
+        "Entry": "OEE Performance component, calculated by MES."
+      },
+      {
+        "Field": "Business Purpose",
+        "Entry": "Measure earned production time relative to operating time."
+      },
+      {
+        "Field": "Formula",
+        "Entry": "IF OperatingTimeInSec = 0 THEN 0 ELSE (EarnedHoursInSec / OperatingTimeInSec) × 100"
+      },
+      {
+        "Field": "Unit",
+        "Entry": "%"
+      },
+      {
+        "Field": "Source Data",
+        "Entry": "EarnedHoursInSec; OperatingTimeInSec"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "OEE; Shift OEE Details for WorkCenter; Hourly OEE Details for WorkCenter; OEE Aggregation Rule"
+      }
+    ]
+  },
+  {
+    "chunk_index": 6,
+    "knowledge_type": "kpi_definition",
+    "section_heading": "2.4 Quality",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Quality"
+      },
+      {
+        "Field": "KPI Name",
+        "Entry": "Quality"
+      },
+      {
+        "Field": "Description",
+        "Entry": "OEE Quality component, calculated by MES."
+      },
+      {
+        "Field": "Business Purpose",
+        "Entry": "Measure accepted/good production relative to total quantity."
+      },
+      {
+        "Field": "Formula",
+        "Entry": "IF TotalQuantity = 0 THEN 0 ELSE (GoodQuantity / TotalQuantity) × 100"
+      },
+      {
+        "Field": "Unit",
+        "Entry": "%"
+      },
+      {
+        "Field": "Source Data",
+        "Entry": "GoodQuantity; TotalQuantity"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "OEE; Shift OEE Details for WorkCenter; Hourly OEE Details for WorkCenter; OEE Aggregation Rule"
+      }
+    ]
+  },
+  {
+    "chunk_index": 7,
+    "knowledge_type": "data_model",
+    "section_heading": "3.1 Data Model — Shift OEE",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Shift OEE Details for WorkCenter"
+      },
+      {
+        "Field": "Model / Table / Entity Name",
+        "Entry": "tOEEShiftDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Name",
+        "Entry": "3.1 Data Model — Shift OEE"
+      },
+      {
+        "Field": "Description",
+        "Entry": "Stores shift-wise production and OEE (Overall Equipment Effectiveness) metrics for each work center or machine. Captures production time, downtime, output quantities, and efficiency measurements for a specific WorkCenter, ShiftDay, and ShiftName combination. Used to monitor operational performance, analyze production losses, calculate OEE components (Availability, Performance, Quality), and track benchmark OEE values throughout the shift."
+      },
+      {
+        "Field": "Database / System",
+        "Entry": "MSSQL"
+      },
+      {
+        "Field": "Schema",
+        "Entry": "dbo"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay + ShiftName"
+      },
+      {
+        "Field": "Granularity",
+        "Entry": "One record per work center per shift"
+      },
+      {
+        "Field": "Related Tables / Entities",
+        "Entry": ""
+      },
+      {
+        "Field": "Related KPIs",
+        "Entry": "OEE; Availability; Performance; Quality"
+      },
+      {
+        "Field": "Related Business Rules",
+        "Entry": "OEE Aggregation Rule"
+      },
+      {
+        "Field": "Source Reference",
+        "Entry": "Supplied EdgeOps knowledge source"
+      }
+    ]
+  },
+  {
+    "chunk_index": 8,
+    "knowledge_type": "data_model",
+    "section_heading": "3.1 Data Model — Shift OEE",
+    "headers": [
+      "Field Name",
+      "Data Type (if known)",
+      "Business Meaning",
+      "Required?",
+      "Key / Relationship",
+      "Notes"
+    ],
+    "records": [
+      {
+        "Field Name": "RowID",
+        "Data Type (if known)": "",
+        "Business Meaning": "Unique identifier assigned to each record within the table. Primary key.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "WorkCenter",
+        "Data Type (if known)": "",
+        "Business Meaning": "Name or identifier of the work center / machine.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftDay",
+        "Data Type (if known)": "",
+        "Business Meaning": "Operational day associated with the work center shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftName",
+        "Data Type (if known)": "",
+        "Business Meaning": "Name or code of the shift assigned to the work center for the respective shift day.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftStartTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled start time of the work shift for the work center (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftStartTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled start time of the work shift for the work center (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftEndTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled end time of the work shift for the work center (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftEndTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled end time of the work shift for the work center (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlannedProductionTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total scheduled production time in seconds for the work center for the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlannedDowntimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total duration in seconds of scheduled downtime during which the work center is intentionally unavailable for production.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "UnplannedDowntimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total duration in seconds of unexpected production stoppages due to unplanned events.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "DowntimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total downtime in seconds for the shift, covering planned and unplanned downtime according to the business definition.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "GrossAvailableTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total scheduled time available for operations, in seconds.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "NetAvailableTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Available production time in seconds after planned downtime deductions.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "OperatingTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Productive operating time in seconds after applicable downtime deductions.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "EarnedHoursInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Standard production time earned for the actual output, in seconds.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "TotalQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total quantity produced or processed during the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ScrapQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total quantity of defective or rejected units during the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "GoodQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total quantity of conforming/accepted units during the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Availability",
+        "Data Type (if known)": "",
+        "Business Meaning": "OEE Availability component for the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Performance",
+        "Data Type (if known)": "",
+        "Business Meaning": "OEE Performance component for the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Quality",
+        "Data Type (if known)": "",
+        "Business Meaning": "OEE Quality component for the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "OEE",
+        "Data Type (if known)": "",
+        "Business Meaning": "Overall Equipment Effectiveness for the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ValidOEE",
+        "Data Type (if known)": "",
+        "Business Meaning": "Indicates whether the stored OEE value is valid for reporting/use.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      }
+    ]
+  },
+  {
+    "chunk_index": 9,
+    "knowledge_type": "data_model",
+    "section_heading": "3.1 Data Model — Shift OEE",
+    "headers": [
+      "Field Name",
+      "Data Type (if known)",
+      "Business Meaning",
+      "Required?",
+      "Key / Relationship",
+      "Notes"
+    ],
+    "records": [
+      {
+        "Field Name": "ShiftDay_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Operational day associated with the previous shift record used for comparison/reference.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftName_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Shift name or code for the previous shift record used for comparison/reference.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftStartTime_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled start time of the previous shift (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftStartTimeUTC_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled start time of the previous shift (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftEndTime_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled end time of the previous shift (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftEndTimeUTC_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled end time of the previous shift (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlannedProductionTimeInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Planned production time in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlannedDowntimeInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Planned downtime in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "UnplannedDowntimeInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Unplanned downtime in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "DowntimeInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total downtime in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "GrossAvailableTimeInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Gross available time in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "NetAvailableTimeInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Net available time in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "OperatingTimeInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Operating time in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "EarnedHoursInSec_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Earned hours in seconds for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "TotalQuantity_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total quantity for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ScrapQuantity_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scrap quantity for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "GoodQuantity_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Good quantity for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Availability_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Availability value for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Performance_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Performance value for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Quality_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Quality value for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "OEE_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "OEE value for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ValidOEE_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Validity indicator for the previous shift OEE value.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "CreatedOn",
+        "Data Type (if known)": "",
+        "Business Meaning": "Record creation timestamp (plant/system timezone as stored).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "CreatedOnUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Record creation timestamp in UTC.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "CreatedBy",
+        "Data Type (if known)": "",
+        "Business Meaning": "Identifier of the user/process that created the record.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LastUpdatedOn",
+        "Data Type (if known)": "",
+        "Business Meaning": "Last update timestamp (plant/system timezone as stored).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LastUpdatedOnUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Last update timestamp in UTC.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      }
+    ]
+  },
+  {
+    "chunk_index": 10,
+    "knowledge_type": "data_model",
+    "section_heading": "3.1 Data Model — Shift OEE",
+    "headers": [
+      "Field Name",
+      "Data Type (if known)",
+      "Business Meaning",
+      "Required?",
+      "Key / Relationship",
+      "Notes"
+    ],
+    "records": [
+      {
+        "Field Name": "LastUpdatedBy",
+        "Data Type (if known)": "",
+        "Business Meaning": "Identifier of the user/process that last updated the record.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlanQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Target quantity planned to be produced for the work center during the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlanQuantity_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Target quantity planned for the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "QuantityUOM",
+        "Data Type (if known)": "",
+        "Business Meaning": "Unit of measurement for the production quantities.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "QuantityUOM_Previous",
+        "Data Type (if known)": "",
+        "Business Meaning": "Unit of measurement for the production quantities in the previous shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "HBMOEE",
+        "Data Type (if known)": "",
+        "Business Meaning": "High Benchmark OEE value for the work center during the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "HBMOEECapturedOn",
+        "Data Type (if known)": "",
+        "Business Meaning": "Timestamp when the High Benchmark OEE was captured (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "HBMOEECapturedOnUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Timestamp when the High Benchmark OEE was captured (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LBMOEE",
+        "Data Type (if known)": "",
+        "Business Meaning": "Low Benchmark OEE value for the work center during the shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LBMOEECapturedOn",
+        "Data Type (if known)": "",
+        "Business Meaning": "Timestamp when the Low Benchmark OEE was captured (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LBMOEECapturedOnUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Timestamp when the Low Benchmark OEE was captured (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      }
+    ]
+  },
+  {
+    "chunk_index": 11,
+    "knowledge_type": "data_model",
+    "section_heading": "3.2 Data Model — Hourly OEE",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Hourly OEE Details for WorkCenter"
+      },
+      {
+        "Field": "Model / Table / Entity Name",
+        "Entry": "tOEEHourlyDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Name",
+        "Entry": "3.2 Data Model — Hourly OEE"
+      },
+      {
+        "Field": "Description",
+        "Entry": "This table stores hourly production and OEE (Overall Equipment Effectiveness) metrics for each work center or machine within a shift. It provides a detailed hour-by-hour view of equipment performance by tracking production time, downtime, output quantities, and OEE components for a specific WorkCenter, ShiftDay, ShiftName, and Hour (HH) combination. The table enables manufacturing teams to monitor operational performance at an hourly level, identify production losses, analyze downtime trends, compare hourly productivity, and calculate OEE metrics including Availability, Performance, and Quality."
+      },
+      {
+        "Field": "Database / System",
+        "Entry": "MSSQL"
+      },
+      {
+        "Field": "Schema",
+        "Entry": "dbo"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay + ShiftName + HH"
+      },
+      {
+        "Field": "Granularity",
+        "Entry": "One record per work center, per shift, per hour"
+      },
+      {
+        "Field": "Related Tables / Entities",
+        "Entry": ""
+      },
+      {
+        "Field": "Related KPIs",
+        "Entry": "OEE; Availability; Performance; Quality"
+      },
+      {
+        "Field": "Related Business Rules",
+        "Entry": "OEE Aggregation Rule"
+      },
+      {
+        "Field": "Source Reference",
+        "Entry": "Supplied EdgeOps knowledge source"
+      }
+    ]
+  },
+  {
+    "chunk_index": 12,
+    "knowledge_type": "data_model",
+    "section_heading": "3.2 Data Model — Hourly OEE",
+    "headers": [
+      "Field Name",
+      "Data Type (if known)",
+      "Business Meaning",
+      "Required?",
+      "Key / Relationship",
+      "Notes"
+    ],
+    "records": [
+      {
+        "Field Name": "RowID",
+        "Data Type (if known)": "",
+        "Business Meaning": "Unique identifier assigned to each record within the table. Primary key.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "WorkCenter",
+        "Data Type (if known)": "",
+        "Business Meaning": "Name or identifier of the work center / machine.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftDay",
+        "Data Type (if known)": "",
+        "Business Meaning": "Operational day associated with the work center shift.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftName",
+        "Data Type (if known)": "",
+        "Business Meaning": "Name or code of the shift assigned to the work center for the respective shift day.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "HH",
+        "Data Type (if known)": "",
+        "Business Meaning": "Hour identifier for the hourly record (00 through 23).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "StartTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "Start time of the hourly interval (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "StartTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Start time of the hourly interval (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "EndTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "End time of the hourly interval (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "EndTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "End time of the hourly interval (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftStartTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled start time of the work shift (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftStartTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled start time of the work shift (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftEndTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled end time of the work shift (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftEndTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled end time of the work shift (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlannedProductionTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled production time in seconds attributable to the hourly interval.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlannedDowntimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Scheduled downtime in seconds during the hourly interval.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "UnplannedDowntimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Unexpected production stoppage time in seconds during the hourly interval.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "DowntimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total downtime in seconds during the hourly interval, covering planned and unplanned downtime according to the business definition.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "GrossAvailableTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Gross time available for operations during the hourly interval, in seconds.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "NetAvailableTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Available production time in seconds after planned downtime deductions.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "OperatingTimeInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Productive operating time in seconds after applicable downtime deductions.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "EarnedHoursInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Standard production time earned for the actual output during the hour, in seconds.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "TotalQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total quantity produced or processed during the hour.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ScrapQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total quantity of defective or rejected units during the hour.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "GoodQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total quantity of conforming/accepted units during the hour.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "PlanQuantity",
+        "Data Type (if known)": "",
+        "Business Meaning": "Target quantity planned to be produced during the hourly interval.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Availability",
+        "Data Type (if known)": "",
+        "Business Meaning": "OEE Availability component for the hour.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      }
+    ]
+  },
+  {
+    "chunk_index": 13,
+    "knowledge_type": "data_model",
+    "section_heading": "3.2 Data Model — Hourly OEE",
+    "headers": [
+      "Field Name",
+      "Data Type (if known)",
+      "Business Meaning",
+      "Required?",
+      "Key / Relationship",
+      "Notes"
+    ],
+    "records": [
+      {
+        "Field Name": "Performance",
+        "Data Type (if known)": "",
+        "Business Meaning": "OEE Performance component for the hour.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "Quality",
+        "Data Type (if known)": "",
+        "Business Meaning": "OEE Quality component for the hour.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "OEE",
+        "Data Type (if known)": "",
+        "Business Meaning": "Overall Equipment Effectiveness for the hour.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ValidOEE",
+        "Data Type (if known)": "",
+        "Business Meaning": "Indicates whether the stored hourly OEE value is valid for reporting/use.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "CreatedOn",
+        "Data Type (if known)": "",
+        "Business Meaning": "Record creation timestamp (plant/system timezone as stored).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "CreatedOnUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Record creation timestamp in UTC.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "CreatedBy",
+        "Data Type (if known)": "",
+        "Business Meaning": "Identifier of the user/process that created the record.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LastUpdatedOn",
+        "Data Type (if known)": "",
+        "Business Meaning": "Last update timestamp (plant/system timezone as stored).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LastUpdatedOnUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Last update timestamp in UTC.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "LastUpdatedBy",
+        "Data Type (if known)": "",
+        "Business Meaning": "Identifier of the user/process that last updated the record.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      }
+    ]
+  },
+  {
+    "chunk_index": 14,
+    "knowledge_type": "data_model",
+    "section_heading": "3.3 Data Model — Downtime",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Downtime Details for WorkCenter"
+      },
+      {
+        "Field": "Model / Table / Entity Name",
+        "Entry": "tDowntimeDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Name",
+        "Entry": "3.3 Data Model — Downtime"
+      },
+      {
+        "Field": "Description",
+        "Entry": "This table stores downtime event history for work centers or machines. Each record represents a specific downtime occurrence against a work center, capturing the downtime event name, start and end times, duration, reason, machine state, and event status. The table provides detailed visibility into production interruptions and supports downtime analysis, root cause identification, loss categorization, and operational improvement initiatives."
+      },
+      {
+        "Field": "Database / System",
+        "Entry": "MSSQL"
+      },
+      {
+        "Field": "Schema",
+        "Entry": "dbo"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "Not specified"
+      },
+      {
+        "Field": "Granularity",
+        "Entry": "One record per downtime event occurrence"
+      },
+      {
+        "Field": "Related Tables / Entities",
+        "Entry": ""
+      },
+      {
+        "Field": "Related KPIs",
+        "Entry": "OEE; Availability; Performance; Quality"
+      },
+      {
+        "Field": "Related Business Rules",
+        "Entry": "OEE Aggregation Rule"
+      },
+      {
+        "Field": "Source Reference",
+        "Entry": "Supplied EdgeOps knowledge source"
+      }
+    ]
+  },
+  {
+    "chunk_index": 15,
+    "knowledge_type": "data_model",
+    "section_heading": "3.3 Data Model — Downtime",
+    "headers": [
+      "Field Name",
+      "Data Type (if known)",
+      "Business Meaning",
+      "Required?",
+      "Key / Relationship",
+      "Notes"
+    ],
+    "records": [
+      {
+        "Field Name": "RowID",
+        "Data Type (if known)": "",
+        "Business Meaning": "Unique identifier assigned to each record within the table. Primary key.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "WorkCenter",
+        "Data Type (if known)": "",
+        "Business Meaning": "Name or identifier of the work center / machine.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "WorkCenterGroup",
+        "Data Type (if known)": "",
+        "Business Meaning": "Group name of the work center / machine.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftDay",
+        "Data Type (if known)": "",
+        "Business Meaning": "Operational day associated with the work center shift and downtime event occurrence.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "ShiftName",
+        "Data Type (if known)": "",
+        "Business Meaning": "Name or code of the shift associated with the downtime event.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "DowntimeName",
+        "Data Type (if known)": "",
+        "Business Meaning": "Name of the downtime event.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "StartTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "Downtime event start time for the work center (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "StartTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Downtime event start time for the work center (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "EndTime",
+        "Data Type (if known)": "",
+        "Business Meaning": "Downtime event end time for the work center (plant timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "EndTimeUTC",
+        "Data Type (if known)": "",
+        "Business Meaning": "Downtime event end time for the work center (UTC timezone).",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "DurationInSec",
+        "Data Type (if known)": "",
+        "Business Meaning": "Total downtime event duration in seconds.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "DowntimeReason",
+        "Data Type (if known)": "",
+        "Business Meaning": "Reason associated with the downtime event.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "MachineState",
+        "Data Type (if known)": "",
+        "Business Meaning": "Machine state of the work center during the downtime event.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      },
+      {
+        "Field Name": "DowntimeStatus",
+        "Data Type (if known)": "",
+        "Business Meaning": "Status of the downtime event.",
+        "Required?": "",
+        "Key / Relationship": "",
+        "Notes": ""
+      }
+    ]
+  },
+  {
+    "chunk_index": 16,
+    "knowledge_type": "business_rule",
+    "section_heading": "4.1 OEE Aggregation Rule",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "OEE Aggregation Rule"
+      },
+      {
+        "Field": "Rule Name",
+        "Entry": "Base-measure aggregation for OEE"
+      },
+      {
+        "Field": "Description",
+        "Entry": "For any aggregation across multiple shifts (same day, week, month, custom date range), do not average Availability, Performance, Quality, or OEE from individual shift records. Aggregate the underlying measures first and then recompute the metrics from the aggregated totals."
+      },
+      {
+        "Field": "Condition",
+        "Entry": "Any aggregation across multiple shifts: same day, week, month or custom date range."
+      },
+      {
+        "Field": "Action / Outcome",
+        "Entry": "Aggregate underlying measures first and then recompute Availability, Performance, Quality and OEE."
+      },
+      {
+        "Field": "Calculation / Formula",
+        "Entry": "Availability = SUM(OperatingTimeInSec)/SUM(NetAvailableTimeInSec); Performance = SUM(EarnedHoursInSec)/SUM(OperatingTimeInSec); Quality = SUM(GoodQuantity)/SUM(TotalQuantity); OEE = Availability_ratio × Performance_ratio × Quality_ratio × 100"
+      },
+      {
+        "Field": "Exception / Exclusion",
+        "Entry": "Single shift/hour uses stored values; benchmark and downtime events use stored event/snapshot values."
+      },
+      {
+        "Field": "Priority",
+        "Entry": "Critical"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "OEE; Availability; Performance; Quality; Shift OEE Details for WorkCenter; Hourly OEE Details for WorkCenter"
+      },
+      {
+        "Field": "Source Reference",
+        "Entry": "Supplied EdgeOps knowledge source"
+      }
+    ]
+  },
+  {
+    "chunk_index": 17,
+    "knowledge_type": "business_rule",
+    "section_heading": "4.1 OEE Aggregation Rule",
+    "headers": [
+      "Scenario",
+      "Required Calculation"
+    ],
+    "records": [
+      {
+        "Scenario": "Single shift",
+        "Required Calculation": "Use stored Availability, Performance, Quality and OEE directly."
+      },
+      {
+        "Scenario": "Single hour",
+        "Required Calculation": "Use stored Availability, Performance, Quality and OEE directly."
+      },
+      {
+        "Scenario": "Benchmark",
+        "Required Calculation": "Use stored HBMOEE and LBMOEE directly."
+      },
+      {
+        "Scenario": "Downtime event",
+        "Required Calculation": "Use event values directly."
+      },
+      {
+        "Scenario": "Multi-shift day",
+        "Required Calculation": "Aggregate base measures and recompute OEE."
+      },
+      {
+        "Scenario": "Week",
+        "Required Calculation": "Aggregate base measures and recompute OEE."
+      },
+      {
+        "Scenario": "Month",
+        "Required Calculation": "Aggregate base measures and recompute OEE."
+      },
+      {
+        "Scenario": "Custom range",
+        "Required Calculation": "Aggregate base measures and recompute OEE."
+      },
+      {
+        "Scenario": "Aggregated reporting",
+        "Required Calculation": "Never use AVG(OEE), AVG(Availability), AVG(Performance) or AVG(Quality)."
+      },
+      {
+        "Scenario": "Total downtime",
+        "Required Calculation": "SUM(DurationInSec)"
+      },
+      {
+        "Scenario": "Longest downtime",
+        "Required Calculation": "MAX(DurationInSec)"
+      },
+      {
+        "Scenario": "Event count",
+        "Required Calculation": "COUNT(*)"
+      }
+    ]
+  },
+  {
+    "chunk_index": 18,
+    "knowledge_type": "data_lineage",
+    "section_heading": "5. Data Lineage",
+    "headers": [
+      "Source System / Table",
+      "Source Field",
+      "Transformation / Business Logic",
+      "Target",
+      "Target Field",
+      "Notes"
+    ],
+    "records": [
+      {
+        "Source System / Table": "KPI.dbo.tOEEShiftDetailsForWorkCenter",
+        "Source Field": "OperatingTimeInSec; NetAvailableTimeInSec",
+        "Transformation / Business Logic": "OperatingTimeInSec / NetAvailableTimeInSec × 100 with zero guard",
+        "Target": "OEE KPI",
+        "Target Field": "Availability",
+        "Notes": "MES-calculated"
+      },
+      {
+        "Source System / Table": "KPI.dbo.tOEEShiftDetailsForWorkCenter",
+        "Source Field": "EarnedHoursInSec; OperatingTimeInSec",
+        "Transformation / Business Logic": "EarnedHoursInSec / OperatingTimeInSec × 100 with zero guard",
+        "Target": "OEE KPI",
+        "Target Field": "Performance",
+        "Notes": "MES-calculated"
+      },
+      {
+        "Source System / Table": "KPI.dbo.tOEEShiftDetailsForWorkCenter",
+        "Source Field": "GoodQuantity; TotalQuantity",
+        "Transformation / Business Logic": "GoodQuantity / TotalQuantity × 100 with zero guard",
+        "Target": "OEE KPI",
+        "Target Field": "Quality",
+        "Notes": "MES-calculated"
+      },
+      {
+        "Source System / Table": "Availability; Performance; Quality",
+        "Source Field": "Calculated ratios",
+        "Transformation / Business Logic": "Multiply component ratios × 100",
+        "Target": "OEE KPI",
+        "Target Field": "OEE",
+        "Notes": "MES-calculated"
+      },
+      {
+        "Source System / Table": "Shift OEE base measures",
+        "Source Field": "Multiple shift records",
+        "Transformation / Business Logic": "SUM base measures then recalculate components and OEE",
+        "Target": "Daily/Weekly/Monthly/Custom OEE",
+        "Target Field": "Aggregated OEE",
+        "Notes": "Never average stored OEE"
+      },
+      {
+        "Source System / Table": "KPI.dbo.tDowntimeDetailsForWorkCenter",
+        "Source Field": "DurationInSec",
+        "Transformation / Business Logic": "SUM / MAX / COUNT depending on question",
+        "Target": "Downtime analysis",
+        "Target Field": "Total/Longest/Count",
+        "Notes": "Event-level values used directly"
+      }
+    ]
+  },
+  {
+    "chunk_index": 19,
+    "knowledge_type": "domain_concept",
+    "section_heading": "6. Domain Concepts",
+    "headers": [
+      "Knowledge Name",
+      "Definition / Business Meaning",
+      "Related Knowledge Names"
+    ],
+    "records": [
+      {
+        "Knowledge Name": "WorkCenter",
+        "Definition / Business Meaning": "Name of work center / machine id.",
+        "Related Knowledge Names": "Shift OEE Details for WorkCenter; Hourly OEE Details for WorkCenter; Downtime Details for WorkCenter"
+      },
+      {
+        "Knowledge Name": "ShiftDay",
+        "Definition / Business Meaning": "Operational day associated with the work center shift.",
+        "Related Knowledge Names": "Shift OEE Details for WorkCenter; Hourly OEE Details for WorkCenter; Downtime Details for WorkCenter"
+      },
+      {
+        "Knowledge Name": "ShiftName",
+        "Definition / Business Meaning": "Name or code of the shift assigned to the work center for the respective shift day.",
+        "Related Knowledge Names": "Shift OEE Details for WorkCenter; Hourly OEE Details for WorkCenter"
+      },
+      {
+        "Knowledge Name": "HBMOEE",
+        "Definition / Business Meaning": "High Benchmark OEE value for the work center during the shift.",
+        "Related Knowledge Names": "Benchmark OEE Trend Lookup; Shift OEE Details for WorkCenter"
+      },
+      {
+        "Knowledge Name": "LBMOEE",
+        "Definition / Business Meaning": "Lowest Benchmark OEE value for the work center during the shift.",
+        "Related Knowledge Names": "Benchmark OEE Trend Lookup; Shift OEE Details for WorkCenter"
+      },
+      {
+        "Knowledge Name": "Downtime Event",
+        "Definition / Business Meaning": "A unique downtime occurrence against a work center during a specific shift.",
+        "Related Knowledge Names": "Downtime Details for WorkCenter; Downtime Lookup"
+      }
+    ]
+  },
+  {
+    "chunk_index": 20,
+    "knowledge_type": "data_query_definition",
+    "section_heading": "7. Data Query Definitions",
+    "headers": [
+      "Knowledge Name",
+      "Business Question",
+      "Required Inputs",
+      "Data Source",
+      "Business Key",
+      "Business Logic"
+    ],
+    "records": [
+      {
+        "Knowledge Name": "Shift OEE Lookup",
+        "Business Question": "What is the shift-wise OEE for a work center?",
+        "Required Inputs": "WorkCenter; ShiftDay/date range; ShiftName where applicable",
+        "Data Source": "KPI.dbo.tOEEShiftDetailsForWorkCenter",
+        "Business Key": "WorkCenter + ShiftDay + ShiftName",
+        "Business Logic": "Return stored Availability, Performance, Quality and OEE; do not recompute."
+      },
+      {
+        "Knowledge Name": "Shift-Day OEE Summary",
+        "Business Question": "What is the OEE across all shifts for a work center on an operational day?",
+        "Required Inputs": "WorkCenter; ShiftDay",
+        "Data Source": "KPI.dbo.tOEEShiftDetailsForWorkCenter",
+        "Business Key": "WorkCenter + ShiftDay",
+        "Business Logic": "Aggregate base measures and recompute metrics."
+      },
+      {
+        "Knowledge Name": "Weekly OEE Summary",
+        "Business Question": "What is weekly OEE for a work center?",
+        "Required Inputs": "WorkCenter; week range",
+        "Data Source": "KPI.dbo.tOEEShiftDetailsForWorkCenter",
+        "Business Key": "WorkCenter + ShiftDay range",
+        "Business Logic": "Aggregate base measures and recompute metrics."
+      },
+      {
+        "Knowledge Name": "Benchmark OEE Trend Lookup",
+        "Business Question": "What was the highest/lowest benchmark OEE and when captured?",
+        "Required Inputs": "WorkCenter; ShiftDay; ShiftName",
+        "Data Source": "KPI.dbo.tOEEShiftDetailsForWorkCenter",
+        "Business Key": "WorkCenter + ShiftDay + ShiftName",
+        "Business Logic": "Return current HBMOEE/LBMOEE snapshot and timestamps; not full history."
+      },
+      {
+        "Knowledge Name": "Hourly OEE Lookup",
+        "Business Question": "What is OEE for a work center, shift and hour?",
+        "Required Inputs": "WorkCenter; ShiftDay; ShiftName; HH",
+        "Data Source": "KPI.dbo.tOEEHourlyDetailsForWorkCenter",
+        "Business Key": "WorkCenter + ShiftDay + ShiftName + HH",
+        "Business Logic": "Return stored hourly metrics directly."
+      },
+      {
+        "Knowledge Name": "Downtime Lookup",
+        "Business Question": "What downtime events occurred for a work center and shift?",
+        "Required Inputs": "WorkCenter; ShiftDay; ShiftName",
+        "Data Source": "KPI.dbo.tDowntimeDetailsForWorkCenter",
+        "Business Key": "WorkCenter + ShiftDay + ShiftName",
+        "Business Logic": "Return events chronologically; SUM/MAX/COUNT for summary questions."
+      }
+    ]
+  },
+  {
+    "chunk_index": 21,
+    "knowledge_type": "data_query_definition",
+    "section_heading": "7.1 Shift OEE Lookup",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Shift OEE Lookup"
+      },
+      {
+        "Field": "Query / Use Case Name",
+        "Entry": "Shift OEE Lookup"
+      },
+      {
+        "Field": "Business Question",
+        "Entry": "Look up shift-wise production and OEE metrics for a specific work center."
+      },
+      {
+        "Field": "Business Purpose",
+        "Entry": "Retrieve stored shift-level OEE metrics."
+      },
+      {
+        "Field": "Required Inputs / Parameters",
+        "Entry": "WorkCenter; ShiftDay/date range; ShiftName for exact shift context"
+      },
+      {
+        "Field": "Data Source / System",
+        "Entry": "MSSQL / KPI"
+      },
+      {
+        "Field": "Table / Dataset / Entity",
+        "Entry": "KPI.dbo.tOEEShiftDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay + ShiftName"
+      },
+      {
+        "Field": "Filter Criteria",
+        "Entry": "WorkCenter and ShiftDay range; order by ShiftDay and ShiftName"
+      },
+      {
+        "Field": "Expected Output",
+        "Entry": "WorkCenter, ShiftDay, ShiftName, OEE, Availability, Performance, Quality, OperatingTimeInSec, NetAvailableTimeInSec, EarnedHoursInSec, GoodQuantity, TotalQuantity"
+      },
+      {
+        "Field": "Calculation Required?",
+        "Entry": "No"
+      },
+      {
+        "Field": "Calculation / Aggregation Rule",
+        "Entry": "Use stored values directly for each shift."
+      },
+      {
+        "Field": "Business Rules to Apply",
+        "Entry": "Do not recompute OEE unless explicitly requested."
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "OEE; Shift OEE Details for WorkCenter; OEE Aggregation Rule"
+      },
+      {
+        "Field": "Source Reference",
+        "Entry": "Supplied EdgeOps knowledge source"
+      }
+    ]
+  },
+  {
+    "chunk_index": 22,
+    "knowledge_type": "data_query_definition",
+    "section_heading": "7.2 Shift-Day OEE Summary",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Shift-Day OEE Summary"
+      },
+      {
+        "Field": "Business Question",
+        "Entry": "Show OEE summary for WorkCenter WC-101 on 2026-07-06."
+      },
+      {
+        "Field": "Required Inputs",
+        "Entry": "WorkCenter; ShiftDay"
+      },
+      {
+        "Field": "Data Source",
+        "Entry": "KPI.dbo.tOEEShiftDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay"
+      },
+      {
+        "Field": "Calculation Required?",
+        "Entry": "Yes"
+      },
+      {
+        "Field": "Calculation / Aggregation Rule",
+        "Entry": "Aggregate NetAvailableTimeInSec, OperatingTimeInSec, EarnedHoursInSec, GoodQuantity and TotalQuantity across shifts, then recompute Availability, Performance, Quality and OEE."
+      },
+      {
+        "Field": "Expected Output",
+        "Entry": "Aggregated daily summary"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "OEE; Availability; Performance; Quality; OEE Aggregation Rule"
+      }
+    ]
+  },
+  {
+    "chunk_index": 23,
+    "knowledge_type": "kpi_definition",
+    "section_heading": "7.2 Shift-Day OEE Summary",
+    "headers": [
+      "Metric",
+      "Formula"
+    ],
+    "records": [
+      {
+        "Metric": "Availability",
+        "Formula": "IF SUM(NetAvailableTimeInSec)=0 THEN 0 ELSE (SUM(OperatingTimeInSec)/SUM(NetAvailableTimeInSec))*100"
+      },
+      {
+        "Metric": "Performance",
+        "Formula": "IF SUM(OperatingTimeInSec)=0 THEN 0 ELSE (SUM(EarnedHoursInSec)/SUM(OperatingTimeInSec))*100"
+      },
+      {
+        "Metric": "Quality",
+        "Formula": "IF SUM(TotalQuantity)=0 THEN 0 ELSE (SUM(GoodQuantity)/SUM(TotalQuantity))*100"
+      },
+      {
+        "Metric": "OEE",
+        "Formula": "(Availability/100) * (Performance/100) * (Quality/100) * 100"
+      }
+    ]
+  },
+  {
+    "chunk_index": 24,
+    "knowledge_type": "data_query_definition",
+    "section_heading": "7.3 Weekly OEE Summary",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Weekly OEE Summary"
+      },
+      {
+        "Field": "Business Question",
+        "Entry": "Show weekly OEE summary for WorkCenter WC-101."
+      },
+      {
+        "Field": "Required Inputs",
+        "Entry": "WorkCenter; week range"
+      },
+      {
+        "Field": "Data Source",
+        "Entry": "KPI.dbo.tOEEShiftDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay range"
+      },
+      {
+        "Field": "Calculation Required?",
+        "Entry": "Yes"
+      },
+      {
+        "Field": "Calculation / Aggregation Rule",
+        "Entry": "Do not average individual shift metrics. Aggregate base measures and recalculate."
+      },
+      {
+        "Field": "Expected Output",
+        "Entry": "Weekly OEE summary"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "OEE; OEE Aggregation Rule"
+      }
+    ]
+  },
+  {
+    "chunk_index": 25,
+    "knowledge_type": "kpi_definition",
+    "section_heading": "7.3 Weekly OEE Summary",
+    "headers": [
+      "Metric",
+      "Formula"
+    ],
+    "records": [
+      {
+        "Metric": "Availability",
+        "Formula": "IF SUM(NetAvailableTimeInSec)=0 THEN 0 ELSE (SUM(OperatingTimeInSec) / SUM(NetAvailableTimeInSec)) * 100"
+      },
+      {
+        "Metric": "Performance",
+        "Formula": "IF SUM(OperatingTimeInSec)=0 THEN 0 ELSE (SUM(EarnedHoursInSec) / SUM(OperatingTimeInSec)) * 100"
+      },
+      {
+        "Metric": "Quality",
+        "Formula": "IF SUM(TotalQuantity)=0 THEN 0 ELSE (SUM(GoodQuantity) / SUM(TotalQuantity)) * 100"
+      },
+      {
+        "Metric": "OEE",
+        "Formula": "(Availability/100) * (Performance/100) * (Quality/100) * 100"
+      }
+    ]
+  },
+  {
+    "chunk_index": 26,
+    "knowledge_type": "data_query_definition",
+    "section_heading": "7.4 Benchmark OEE Trend Lookup",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Benchmark OEE Trend Lookup"
+      },
+      {
+        "Field": "Business Question",
+        "Entry": "What was the highest benchmark OEE recorded for WorkCenter WC-101 during the last shift, and when was it captured?"
+      },
+      {
+        "Field": "Required Inputs",
+        "Entry": "WorkCenter; ShiftDay; ShiftName"
+      },
+      {
+        "Field": "Data Source",
+        "Entry": "KPI.dbo.tOEEShiftDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay + ShiftName"
+      },
+      {
+        "Field": "Expected Output",
+        "Entry": "HBMOEE, HBMOEECapturedOn, HBMOEECapturedOnUTC, LBMOEE, LBMOEECapturedOn, LBMOEECapturedOnUTC"
+      },
+      {
+        "Field": "Calculation Required?",
+        "Entry": "No"
+      },
+      {
+        "Field": "Business Rule",
+        "Entry": "Use stored benchmark values directly."
+      },
+      {
+        "Field": "Important Limitation",
+        "Entry": "The table stores only the current high/low snapshot per shift, not minute-by-minute history."
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "Shift OEE Details for WorkCenter; HBMOEE; LBMOEE"
+      }
+    ]
+  },
+  {
+    "chunk_index": 27,
+    "knowledge_type": "data_query_definition",
+    "section_heading": "7.5 Hourly OEE Lookup",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Hourly OEE Lookup"
+      },
+      {
+        "Field": "Business Question",
+        "Entry": "What is the OEE for WorkCenter WC-101 on 2026-07-06 for Shift A at Hour 08?"
+      },
+      {
+        "Field": "Required Inputs",
+        "Entry": "WorkCenter; ShiftDay; ShiftName; HH"
+      },
+      {
+        "Field": "Data Source",
+        "Entry": "KPI.dbo.tOEEHourlyDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay + ShiftName + HH"
+      },
+      {
+        "Field": "Calculation Required?",
+        "Entry": "No for stored hourly values"
+      },
+      {
+        "Field": "Business Rule",
+        "Entry": "Use stored hourly OEE values for trend visualization. If an aggregated shift-level metric is required, aggregate base measures and recalculate rather than averaging hourly OEE."
+      },
+      {
+        "Field": "Expected Output",
+        "Entry": "Availability, Performance, Quality, OEE; optionally quantities and downtime measures"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "Hourly OEE Details for WorkCenter; OEE; OEE Aggregation Rule"
+      }
+    ]
+  },
+  {
+    "chunk_index": 28,
+    "knowledge_type": "data_query_definition",
+    "section_heading": "7.6 Downtime Lookup",
+    "headers": [
+      "Field",
+      "Entry"
+    ],
+    "records": [
+      {
+        "Field": "Knowledge Name",
+        "Entry": "Downtime Lookup"
+      },
+      {
+        "Field": "Business Question",
+        "Entry": "Show downtime events for WorkCenter WC-101 on 2026-07-06 during Shift A."
+      },
+      {
+        "Field": "Required Inputs",
+        "Entry": "WorkCenter; ShiftDay; ShiftName"
+      },
+      {
+        "Field": "Data Source",
+        "Entry": "KPI.dbo.tDowntimeDetailsForWorkCenter"
+      },
+      {
+        "Field": "Business Key",
+        "Entry": "WorkCenter + ShiftDay + ShiftName + downtime occurrence"
+      },
+      {
+        "Field": "Calculation Required?",
+        "Entry": "Only for total/longest/count summaries"
+      },
+      {
+        "Field": "Expected Output",
+        "Entry": "DowntimeName, StartTime, EndTime, DurationInSec, DowntimeReason, MachineState, DowntimeStatus"
+      },
+      {
+        "Field": "Business Rules",
+        "Entry": "Chronological event output; total = SUM(DurationInSec); longest = MAX(DurationInSec); count = COUNT(*)"
+      },
+      {
+        "Field": "Related Knowledge Names",
+        "Entry": "Downtime Details for WorkCenter; Availability"
+      }
+    ]
+  },
+  {
+    "chunk_index": 29,
+    "knowledge_type": "data_lineage",
+    "section_heading": "8. Knowledge Relationships",
+    "headers": [
+      "From Knowledge Name",
+      "Relationship",
+      "To Knowledge Name",
+      "Context / Notes"
+    ],
+    "records": [
+      {
+        "From Knowledge Name": "OEE",
+        "Relationship": "HAS_COMPONENT",
+        "To Knowledge Name": "Availability",
+        "Context / Notes": "OEE component"
+      },
+      {
+        "From Knowledge Name": "OEE",
+        "Relationship": "HAS_COMPONENT",
+        "To Knowledge Name": "Performance",
+        "Context / Notes": "OEE component"
+      },
+      {
+        "From Knowledge Name": "OEE",
+        "Relationship": "HAS_COMPONENT",
+        "To Knowledge Name": "Quality",
+        "Context / Notes": "OEE component"
+      },
+      {
+        "From Knowledge Name": "OEE",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Shift OEE Details for WorkCenter",
+        "Context / Notes": "Shift-level source"
+      },
+      {
+        "From Knowledge Name": "OEE",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Hourly OEE Details for WorkCenter",
+        "Context / Notes": "Hourly source"
+      },
+      {
+        "From Knowledge Name": "OEE Aggregation Rule",
+        "Relationship": "GOVERNS",
+        "To Knowledge Name": "OEE",
+        "Context / Notes": "Controls aggregation behavior"
+      },
+      {
+        "From Knowledge Name": "OEE Aggregation Rule",
+        "Relationship": "APPLIES_TO",
+        "To Knowledge Name": "Shift OEE Details for WorkCenter",
+        "Context / Notes": "Multi-shift aggregation"
+      },
+      {
+        "From Knowledge Name": "OEE Aggregation Rule",
+        "Relationship": "APPLIES_TO",
+        "To Knowledge Name": "Hourly OEE Details for WorkCenter",
+        "Context / Notes": "Aggregated hourly data"
+      },
+      {
+        "From Knowledge Name": "Shift OEE Lookup",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Shift OEE Details for WorkCenter",
+        "Context / Notes": "Retrieval workflow"
+      },
+      {
+        "From Knowledge Name": "Shift-Day OEE Summary",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Shift OEE Details for WorkCenter",
+        "Context / Notes": "Daily aggregation workflow"
+      },
+      {
+        "From Knowledge Name": "Weekly OEE Summary",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Shift OEE Details for WorkCenter",
+        "Context / Notes": "Weekly aggregation workflow"
+      },
+      {
+        "From Knowledge Name": "Benchmark OEE Trend Lookup",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Shift OEE Details for WorkCenter",
+        "Context / Notes": "Benchmark snapshot"
+      },
+      {
+        "From Knowledge Name": "Hourly OEE Lookup",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Hourly OEE Details for WorkCenter",
+        "Context / Notes": "Hourly retrieval"
+      },
+      {
+        "From Knowledge Name": "Downtime Lookup",
+        "Relationship": "USES_DATA",
+        "To Knowledge Name": "Downtime Details for WorkCenter",
+        "Context / Notes": "Event retrieval"
+      },
+      {
+        "From Knowledge Name": "Downtime Details for WorkCenter",
+        "Relationship": "SUPPORTS_ANALYSIS_OF",
+        "To Knowledge Name": "Availability",
+        "Context / Notes": "Downtime impacts availability"
+      }
+    ]
+  }
+]

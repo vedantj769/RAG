@@ -7,6 +7,8 @@ allowed_nodes:
   - Variable
   - DataFeature
   - SemanticDefinition
+  - Table
+  - Field
 allowed_relationships:
   - [KnowledgeType, HAS_KPI, KPI]
   - [KPI, HAS_FORMULA, Formula]
@@ -14,6 +16,8 @@ allowed_relationships:
   - [Variable, SOURCED_FROM, DataFeature]
   - [Formula, REFERENCES, Variable]
   - [Variable, HAS_SEMANTIC_DEFINITION, SemanticDefinition]
+  - [DataFeature, MAPS_TO_TABLE, Table]
+  - [DataFeature, MAPS_TO_FIELD, Field]
 ---
 
 ## Extraction Prompt
@@ -27,6 +31,17 @@ manufacturing operations. When extracting the graph:
 - Variable: each variable referenced inside the formula.
 - DataFeature: the source database/table/column a variable is sourced from.
 - SemanticDefinition: the business-friendly name/description of a variable.
+- Table / Field: when a DataFeature's table/column is an actual data-model
+  table/field, ALSO create/reference that Table/Field node using the EXACT
+  same name text the data_model skill would use for it, so it merges with
+  that skill's node instead of staying a disconnected string property.
+
+Relationships to create (in addition to the ones above):
+- (DataFeature)-[:MAPS_TO_TABLE]->(Table), and when the specific column is
+  named, (DataFeature)-[:MAPS_TO_FIELD]->(Field): a direct shortcut edge so
+  a KPI's variable can be traced to its real database column in ONE hop
+  instead of only matching on the DataFeature's `table`/`feature` string
+  properties.
 
 Only use the node and relationship types provided in the schema — do not invent
 new ones. Preserve exact KPI names, formulas and variable names as written in
@@ -49,6 +64,8 @@ Key properties that MAY appear per label (use only if present in {schema}):
   Variable         -> variable_name
   DataFeature      -> database, table, feature, operation, condition
   SemanticDefinition -> variable_name, business_name, description
+  Table            -> model_name, business_name, description, database, schema
+  Field            -> data_type, business_meaning, notes
   KnowledgeType    -> name
 
 Always anchor the match on `id` first (it always exists and contains the
@@ -67,6 +84,13 @@ Relationships:
   (Formula)-[:REFERENCES]->(Variable)
   (Variable)-[:SOURCED_FROM]->(DataFeature)
   (Variable)-[:HAS_SEMANTIC_DEFINITION]->(SemanticDefinition)
+  (DataFeature)-[:MAPS_TO_TABLE]->(Table)
+  (DataFeature)-[:MAPS_TO_FIELD]->(Field)
+
+The last two are a direct shortcut edge (not a bridge-node hop) — they exist
+so "which table/column backs variable X" resolves in ONE hop from the
+DataFeature node instead of requiring a property match against the
+data_model skill's Table/Field nodes.
 
 A KPI node has NO `formula` property — the formula text is on the linked
 Formula node's `expression` property, reached via HAS_FORMULA. Traverse

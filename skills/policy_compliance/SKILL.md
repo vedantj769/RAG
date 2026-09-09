@@ -6,11 +6,13 @@ allowed_nodes:
   - KPI
   - Table
   - BusinessRule
+  - DomainConcept
 allowed_relationships:
   - [KnowledgeType, HAS_POLICY, Policy]
   - [Policy, GOVERNS, Table]
   - [Policy, APPLIES_TO, KPI]
   - [Policy, RELATED_TO, BusinessRule]
+  - [Policy, REFERENCES_CONCEPT, DomainConcept]
 ---
 
 ## Extraction Prompt
@@ -28,6 +30,9 @@ Source Reference, Business Notes. When extracting the graph:
   that is clearly one of these, create/reference that node using the EXACT
   same name text the owning skill (kpi_definition / data_model /
   business_rule) would use for it, so they merge instead of duplicating.
+- DomainConcept: for every business term under "Related Knowledge Names"
+  that isn't a KPI/Table/BusinessRule, create/reference it using the EXACT
+  same name text the domain_concept skill would use for it.
 
 Relationships to create:
 - (KnowledgeType)-[:HAS_POLICY]->(Policy)
@@ -37,6 +42,9 @@ Relationships to create:
   or interpretation.
 - (Policy)-[:RELATED_TO]->(BusinessRule): when a business rule enforces or
   overlaps with this policy.
+- (Policy)-[:REFERENCES_CONCEPT]->(DomainConcept): a direct shortcut edge so
+  a policy's referenced business term is one hop away instead of only living
+  in the free-text `requirement`/`applicability` properties.
 
 Only use the node and relationship types provided in the schema — do not
 invent new ones. Preserve exact policy requirement/condition text as written.
@@ -55,6 +63,7 @@ Key properties that MAY appear per label (use only if present in {schema}):
   KPI           -> knowledge_name, kpi_name, business_purpose, description
   Table         -> model_name, business_name, description, database, schema
   BusinessRule  -> rule_name, condition, description
+  DomainConcept -> term, definition
   KnowledgeType -> name
 
 Always anchor the match on `id` first, then OR in any named properties from
@@ -67,11 +76,14 @@ Relationships:
   (Policy)-[:GOVERNS]->(Table)
   (Policy)-[:APPLIES_TO]->(KPI)
   (Policy)-[:RELATED_TO]->(BusinessRule)
+  (Policy)-[:REFERENCES_CONCEPT]->(DomainConcept)
 
 KPI, Table and BusinessRule nodes here are the SAME nodes the kpi_definition,
 data_model and business_rule skills extract (same label + same `id`
 convention) — so a question like "what policy applies to OEE" anchors on the
-KPI node and reaches whichever policy applies to it.
+KPI node and reaches whichever policy applies to it. REFERENCES_CONCEPT is a
+direct shortcut edge (not a bridge-node hop) to the domain_concept skill's
+node, one hop instead of two.
 
 Never hand-pick individual relationships to traverse based on the wording of
 the question. Any question that identifies a specific entity (a Policy, KPI,

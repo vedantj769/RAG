@@ -61,3 +61,42 @@ def split_by_headings(documents: list[Document], section_marker: str = "##") -> 
 
     logger.info("Split %d document(s) into %d heading-based section(s)", len(documents), len(chunks))
     return chunks
+
+
+def split_by_top_level_sections(documents: list[Document]) -> list[Document]:
+    """Split each document into one chunk per top-level (`# `) heading section, keeping
+    every nested subsection/table under it in the same chunk. Each chunk's metadata
+    carries a `heading` key (the top-level heading text, without the `# ` marker) so
+    callers can route the section to the matching skill before further chunking it
+    with `split_by_headings`.
+    """
+    if not documents:
+        return []
+
+    chunks: list[Document] = []
+    for document in documents:
+        current_heading = ""
+        current_section: list[str] = []
+
+        def flush(heading: str, section: list[str]) -> None:
+            if section:
+                chunks.append(
+                    Document(
+                        page_content="\n".join(section),
+                        metadata={**document.metadata, "heading": heading},
+                    )
+                )
+
+        for line in document.page_content.splitlines():
+            if line.startswith("# "):
+                flush(current_heading, current_section)
+                current_heading = line[2:].strip()
+                current_section = [line]
+            else:
+                current_section.append(line)
+        flush(current_heading, current_section)
+
+    logger.info(
+        "Split %d document(s) into %d top-level section(s)", len(documents), len(chunks)
+    )
+    return chunks
