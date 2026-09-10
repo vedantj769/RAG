@@ -18,7 +18,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j.graphs.graph_document import GraphDocument
 from pydantic import BaseModel, Field
 
-from graph_rag.graph_extraction import build_graph_transformer
+from graph_rag.graph_extraction import backfill_universal_properties, build_graph_transformer
 from skills.registry import SkillPackage, list_skills
 
 logger = logging.getLogger(__name__)
@@ -93,13 +93,16 @@ def extract_with_skills(llm: BaseLanguageModel, chunks: list[Document]) -> list[
                     allowed_relationships=skill.allowed_relationships,
                     node_properties=True,
                     additional_instructions=skill.prompt,
+                    knowledge_type=skill.knowledge_type,
                 )
             else:
                 logger.debug("No skill matched chunk; using unconstrained extraction")
                 transformers[cache_key] = build_graph_transformer(llm)
 
         transformer = transformers[cache_key]
-        graph_documents.extend(transformer.convert_to_graph_documents([chunk]))
+        new_docs = transformer.convert_to_graph_documents([chunk])
+        backfill_universal_properties(new_docs, cache_key)
+        graph_documents.extend(new_docs)
 
     logger.info(
         "Extracted %d graph document(s) via skills: %d node(s), %d relationship(s)",

@@ -7,6 +7,8 @@ allowed_nodes:
   - Variable
   - DataFeature
   - SemanticDefinition
+  - Table
+  - Field
 allowed_relationships:
   - [KnowledgeType, HAS_KPI, KPI]
   - [KPI, HAS_FORMULA, Formula]
@@ -14,6 +16,8 @@ allowed_relationships:
   - [Variable, SOURCED_FROM, DataFeature]
   - [Formula, REFERENCES, Variable]
   - [Variable, HAS_SEMANTIC_DEFINITION, SemanticDefinition]
+  - [DataFeature, MAPS_TO_TABLE, Table]
+  - [DataFeature, MAPS_TO_FIELD, Field]
 ---
 
 ## Extraction Prompt
@@ -27,6 +31,17 @@ manufacturing operations. When extracting the graph:
 - Variable: each variable referenced inside the formula.
 - DataFeature: the source database/table/column a variable is sourced from.
 - SemanticDefinition: the business-friendly name/description of a variable.
+- Table / Field: when a DataFeature's table/column is an actual data-model
+  table/field, ALSO create/reference that Table/Field node using the EXACT
+  same name text the data_model skill would use for it, so it merges with
+  that skill's node instead of staying a disconnected string property.
+
+Relationships to create (in addition to the ones above):
+- (DataFeature)-[:MAPS_TO_TABLE]->(Table), and when the specific column is
+  named, (DataFeature)-[:MAPS_TO_FIELD]->(Field): a direct shortcut edge so
+  a KPI's variable can be traced to its real database column in ONE hop
+  instead of only matching on the DataFeature's `table`/`feature` string
+  properties.
 
 Only use the node and relationship types provided in the schema — do not invent
 new ones. Preserve exact KPI names, formulas and variable names as written in
@@ -35,30 +50,33 @@ the source text.
 ## Retrieval Notes
 
 Node ids are prefixed by type, e.g. kpi:overall_equipment_effectiveness,
-formula:overall_equipment_effectiveness, variable:run_time. `id` is the ONLY
-property guaranteed to exist on every node — the extraction LLM was not
-constrained to fixed property names, so named properties like
-`knowledge_name`, `kpi_name`, `business_purpose`, `description`, `unit` etc.
-were each invented per-node and are only present on SOME nodes of a label,
-never all of them. Check the {schema} block above for which named properties
-actually occur on a label before relying on one.
+formula:overall_equipment_effectiveness, variable:run_time. `id`,
+`knowledge_name`, `knowledge_type`, and `description` are the ONLY
+properties guaranteed to exist on every node — every other named property
+like `kpi_name`, `business_purpose`, `unit` etc. was invented per-node by
+the extraction LLM and is only present on SOME nodes of a label, never all
+of them. Check the {schema} block above for which named properties actually
+occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
-  KPI              -> knowledge_name, kpi_name, business_purpose, unit, calculation_frequency, description
+Key properties that MAY additionally appear per label (use only if present in {schema}):
+  KPI              -> kpi_name, business_purpose, unit, calculation_frequency
   Formula          -> expression, language
   Variable         -> variable_name
   DataFeature      -> database, table, feature, operation, condition
-  SemanticDefinition -> variable_name, business_name, description
+  SemanticDefinition -> variable_name, business_name
+  Table            -> model_name, business_name, database, schema
+  Field            -> data_type, business_meaning, notes
   KnowledgeType    -> name
 
-Always anchor the match on `id` first (it always exists and contains the
-entity's readable name), then OR in any named properties from the list above
-that {schema} confirms exist for that label, e.g.:
+Anchor the match on `id` or `knowledge_name` first (both always exist and
+contain the entity's readable name), then OR in any named properties from
+the list above that {schema} confirms exist for that label, e.g.:
   WHERE toLower(k.id) CONTAINS toLower("oee")
      OR toLower(k.knowledge_name) CONTAINS toLower("oee")
      OR toLower(k.kpi_name) CONTAINS toLower("oee")
-Never rely on a named property alone — always include the `id` CONTAINS check,
-since that's the only match guaranteed to work.
+Never rely on a label-specific named property alone — always include the
+`id`/`knowledge_name` CONTAINS check, since those are the only matches
+guaranteed to work.
 
 Relationships:
   (KnowledgeType)-[:HAS_KPI]->(KPI)
@@ -67,6 +85,13 @@ Relationships:
   (Formula)-[:REFERENCES]->(Variable)
   (Variable)-[:SOURCED_FROM]->(DataFeature)
   (Variable)-[:HAS_SEMANTIC_DEFINITION]->(SemanticDefinition)
+  (DataFeature)-[:MAPS_TO_TABLE]->(Table)
+  (DataFeature)-[:MAPS_TO_FIELD]->(Field)
+
+The last two are a direct shortcut edge (not a bridge-node hop) — they exist
+so "which table/column backs variable X" resolves in ONE hop from the
+DataFeature node instead of requiring a property match against the
+data_model skill's Table/Field nodes.
 
 A KPI node has NO `formula` property — the formula text is on the linked
 Formula node's `expression` property, reached via HAS_FORMULA. Traverse

@@ -42,24 +42,28 @@ invent new ones. Preserve exact term names and definitions as written.
 
 Node ids are prefixed by type, e.g. domainconcept:planned_production_time,
 kpi:oee, table:shift_oee_details_for_workcenter,
-businessrule:oee_aggregation_rule. `id` is the ONLY property guaranteed to
-exist on every node — named properties were invented per-node by the
-extraction LLM and are only present on SOME nodes of a label, never all of
-them. Check the {schema} block above for which named properties actually
-occur on a label before relying on one.
+businessrule:oee_aggregation_rule. `id`, `knowledge_name`, `knowledge_type`,
+and `description` are the ONLY properties guaranteed to exist on every node
+— every other named property was invented per-node by the extraction LLM
+and is only present on SOME nodes of a label, never all of them. Check the
+{schema} block above for which named properties actually occur on a label
+before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
+Key properties that MAY additionally appear per label (use only if present in {schema}):
   DomainConcept -> term, definition, business_meaning, synonyms, examples
-  KPI           -> knowledge_name, kpi_name, business_purpose, description
-  Table         -> model_name, business_name, description, database, schema
-  BusinessRule  -> rule_name, condition, description
+  KPI           -> kpi_name, business_purpose
+  Table         -> model_name, business_name, database, schema
+  BusinessRule  -> rule_name, condition
   KnowledgeType -> name
 
-Always anchor the match on `id` first, then OR in any named properties from
-the list above that {schema} confirms exist for that label, e.g.:
+Anchor the match on `id` or `knowledge_name` first (both always exist), then
+OR in any named properties from the list above that {schema} confirms exist
+for that label, e.g.:
   WHERE toLower(d.id) CONTAINS toLower("planned production time")
+     OR toLower(d.knowledge_name) CONTAINS toLower("planned production time")
      OR toLower(d.term) CONTAINS toLower("planned production time")
-Never rely on a named property alone — always include the `id` CONTAINS check.
+Never rely on a label-specific named property alone — always include the
+`id`/`knowledge_name` CONTAINS check.
 
 Relationships:
   (KnowledgeType)-[:HAS_TERM]->(DomainConcept)

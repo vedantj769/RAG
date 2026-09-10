@@ -71,26 +71,29 @@ written in the source text.
 
 Node ids are prefixed by type, e.g. table:shift_oee_details_for_workcenter,
 field:workcenter, field:oee, kpi:oee, businessrule:oee_aggregation_rule.
-`id` is the ONLY property guaranteed to exist on every node — named
-properties were invented per-node by the extraction LLM and are only present
-on SOME nodes of a label, never all of them. Check the {schema} block above
-for which named properties actually occur on a label before relying on one.
+`id`, `knowledge_name`, `knowledge_type`, and `description` are the ONLY
+properties guaranteed to exist on every node — every other named property
+was invented per-node by the extraction LLM and is only present on SOME
+nodes of a label, never all of them. Check the {schema} block above for
+which named properties actually occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
-  Table         -> model_name, business_name, description, database, schema, business_key, granularity, source_reference
+Key properties that MAY additionally appear per label (use only if present in {schema}):
+  Table         -> model_name, business_name, database, schema, business_key, granularity, source_reference
   Field         -> data_type, business_meaning, required, notes
-  KPI           -> knowledge_name, kpi_name, business_purpose, unit, calculation_frequency, description
-  BusinessRule  -> rule_name, description
+  KPI           -> kpi_name, business_purpose, unit, calculation_frequency
+  BusinessRule  -> rule_name
   KnowledgeType -> name
 
-Always anchor the match on `id` first (it always exists and contains the
-entity's readable name), then OR in any named properties from the list above
-that {schema} confirms exist for that label, e.g.:
+Anchor the match on `id` or `knowledge_name` first (both always exist and
+contain the entity's readable name), then OR in any named properties from
+the list above that {schema} confirms exist for that label, e.g.:
   WHERE toLower(t.id) CONTAINS toLower("shift oee")
+     OR toLower(t.knowledge_name) CONTAINS toLower("shift oee")
      OR toLower(t.business_name) CONTAINS toLower("shift oee")
      OR toLower(t.model_name) CONTAINS toLower("shift oee")
-Never rely on a named property alone — always include the `id` CONTAINS check,
-since that's the only match guaranteed to work.
+Never rely on a label-specific named property alone — always include the
+`id`/`knowledge_name` CONTAINS check, since those are the only matches
+guaranteed to work.
 
 Relationships:
   (KnowledgeType)-[:HAS_TABLE]->(Table)

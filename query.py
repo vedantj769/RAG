@@ -8,7 +8,8 @@ from graph_rag.config import ConfigError, load_settings
 from graph_rag.llm import build_groq_llm
 from graph_rag.logging_config import setup_logging
 from graph_rag.neo4j_store import build_neo4j_graph
-from graph_rag.retrieval import answer_question
+from graph_rag.router import route_and_answer
+from graph_rag.vector_store import build_vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,19 @@ def main() -> int:
         settings.neo4j_database,
     )
     try:
-        answer = answer_question(graph, llm, question, top_k=settings.retrieval_top_k)
+        try:
+            vector_store = build_vector_store(
+                settings.neo4j_uri,
+                settings.neo4j_username,
+                settings.neo4j_password,
+                settings.neo4j_database,
+                settings.embedding_model,
+            )
+        except Exception:
+            logger.warning("Vector store unavailable; falling back to graph-only retrieval", exc_info=True)
+            vector_store = None
+
+        answer = route_and_answer(graph, llm, question, settings, vector_store=vector_store)
     finally:
         graph.close()
 

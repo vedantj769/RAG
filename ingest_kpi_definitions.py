@@ -41,8 +41,9 @@ def main() -> int:
         allowed_relationships=ALLOWED_RELATIONSHIPS,
         node_properties=True,
         additional_instructions=EXTRACTION_INSTRUCTIONS,
+        knowledge_type="kpi_definition",
     )
-    graph_documents = extract_graph_documents(transformer, chunks)
+    graph_documents = extract_graph_documents(transformer, chunks, knowledge_type="kpi_definition")
 
     graph = build_neo4j_graph(
         settings.neo4j_uri,

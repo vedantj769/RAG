@@ -5,10 +5,12 @@ allowed_nodes:
   - Report
   - ReportSection
   - KPI
+  - Query
 allowed_relationships:
   - [KnowledgeType, HAS_REPORT, Report]
   - [Report, HAS_COMPONENT, ReportSection]
   - [Report, SUPPORTS_ANALYSIS_OF, KPI]
+  - [Report, USES_QUERY, Query]
 ---
 
 ## Extraction Prompt
@@ -30,11 +32,17 @@ Notes. When extracting the graph:
   create/reference that node using the EXACT same name text the
   kpi_definition skill would use for it, so they merge instead of
   duplicating.
+- Query: when a report's data is clearly produced by a named Data Query
+  Definition, create/reference that node using the EXACT same name text the
+  data_query_definition skill would use for it.
 
 Relationships to create:
 - (KnowledgeType)-[:HAS_REPORT]->(Report)
 - (Report)-[:HAS_COMPONENT]->(ReportSection) for every section.
 - (Report)-[:SUPPORTS_ANALYSIS_OF]->(KPI) for every KPI the report covers.
+- (Report)-[:USES_QUERY]->(Query): a direct shortcut edge so the retrieval
+  recipe behind a report's numbers is one hop away instead of only reachable
+  via a shared KPI node.
 
 Only use the node and relationship types provided in the schema — do not
 invent new ones. Preserve exact report/section names as written.
@@ -42,30 +50,36 @@ invent new ones. Preserve exact report/section names as written.
 ## Retrieval Notes
 
 Node ids are prefixed by type, e.g. report:daily_production_report,
-reportsection:summary, kpi:oee. `id` is the ONLY property guaranteed to
-exist on every node — named properties were invented per-node by the
-extraction LLM and are only present on SOME nodes of a label, never all of
-them. Check the {schema} block above for which named properties actually
-occur on a label before relying on one.
+reportsection:summary, kpi:oee, query:shift_oee_lookup. `id`,
+`knowledge_name`, `knowledge_type`, and `description` are the ONLY
+properties guaranteed to exist on every node — every other named property
+was invented per-node by the extraction LLM and is only present on SOME
+nodes of a label, never all of them. Check the {schema} block above for
+which named properties actually occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
-  Report        -> purpose, audience, filters, frequency, description
-  ReportSection -> section_name, description
-  KPI           -> knowledge_name, kpi_name, business_purpose, description
+Key properties that MAY additionally appear per label (use only if present in {schema}):
+  Report        -> purpose, audience, filters, frequency
+  ReportSection -> section_name
+  KPI           -> kpi_name, business_purpose
+  Query         -> business_question, business_purpose, data_source, calculation_rule
   KnowledgeType -> name
 
-Always anchor the match on `id` first, then OR in any named properties from
-the list above that {schema} confirms exist for that label. Never rely on a
-named property alone — always include the `id` CONTAINS check.
+Anchor the match on `id` or `knowledge_name` first (both always exist), then
+OR in any named properties from the list above that {schema} confirms exist
+for that label. Never rely on a label-specific named property alone —
+always include the `id`/`knowledge_name` CONTAINS check.
 
 Relationships:
   (KnowledgeType)-[:HAS_REPORT]->(Report)
   (Report)-[:HAS_COMPONENT]->(ReportSection)
   (Report)-[:SUPPORTS_ANALYSIS_OF]->(KPI)
+  (Report)-[:USES_QUERY]->(Query)
 
 KPI nodes here are the SAME nodes the kpi_definition skill extracts (same
 label + same `id` convention) — so a question like "which report shows OEE"
-anchors on the KPI node and reaches whichever report covers it.
+anchors on the KPI node and reaches whichever report covers it. USES_QUERY
+is a direct shortcut edge (not a bridge-node hop) to the
+data_query_definition skill's node, one hop instead of two via KPI.
 
 Never hand-pick individual relationships to traverse based on the wording of
 the question. Any question that identifies a specific entity (a Report,
