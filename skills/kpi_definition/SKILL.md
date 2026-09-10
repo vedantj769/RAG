@@ -50,32 +50,33 @@ the source text.
 ## Retrieval Notes
 
 Node ids are prefixed by type, e.g. kpi:overall_equipment_effectiveness,
-formula:overall_equipment_effectiveness, variable:run_time. `id` is the ONLY
-property guaranteed to exist on every node — the extraction LLM was not
-constrained to fixed property names, so named properties like
-`knowledge_name`, `kpi_name`, `business_purpose`, `description`, `unit` etc.
-were each invented per-node and are only present on SOME nodes of a label,
-never all of them. Check the {schema} block above for which named properties
-actually occur on a label before relying on one.
+formula:overall_equipment_effectiveness, variable:run_time. `id`,
+`knowledge_name`, `knowledge_type`, and `description` are the ONLY
+properties guaranteed to exist on every node — every other named property
+like `kpi_name`, `business_purpose`, `unit` etc. was invented per-node by
+the extraction LLM and is only present on SOME nodes of a label, never all
+of them. Check the {schema} block above for which named properties actually
+occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
-  KPI              -> knowledge_name, kpi_name, business_purpose, unit, calculation_frequency, description
+Key properties that MAY additionally appear per label (use only if present in {schema}):
+  KPI              -> kpi_name, business_purpose, unit, calculation_frequency
   Formula          -> expression, language
   Variable         -> variable_name
   DataFeature      -> database, table, feature, operation, condition
-  SemanticDefinition -> variable_name, business_name, description
-  Table            -> model_name, business_name, description, database, schema
+  SemanticDefinition -> variable_name, business_name
+  Table            -> model_name, business_name, database, schema
   Field            -> data_type, business_meaning, notes
   KnowledgeType    -> name
 
-Always anchor the match on `id` first (it always exists and contains the
-entity's readable name), then OR in any named properties from the list above
-that {schema} confirms exist for that label, e.g.:
+Anchor the match on `id` or `knowledge_name` first (both always exist and
+contain the entity's readable name), then OR in any named properties from
+the list above that {schema} confirms exist for that label, e.g.:
   WHERE toLower(k.id) CONTAINS toLower("oee")
      OR toLower(k.knowledge_name) CONTAINS toLower("oee")
      OR toLower(k.kpi_name) CONTAINS toLower("oee")
-Never rely on a named property alone — always include the `id` CONTAINS check,
-since that's the only match guaranteed to work.
+Never rely on a label-specific named property alone — always include the
+`id`/`knowledge_name` CONTAINS check, since those are the only matches
+guaranteed to work.
 
 Relationships:
   (KnowledgeType)-[:HAS_KPI]->(KPI)

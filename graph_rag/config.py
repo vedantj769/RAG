@@ -38,6 +38,13 @@ class Settings:
     chunk_overlap: int
 
     retrieval_top_k: int
+    retrieval_hops: int
+    retrieval_max_context_chars: int
+
+    min_graph_context_chars: int
+    embedding_model: str
+    query_cache_ttl_seconds: int
+    query_cache_max_entries: int
 
     log_level: str
 
@@ -55,6 +62,12 @@ def load_settings() -> Settings:
         chunk_size=int(os.getenv("CHUNK_SIZE", "1000")),
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "200")),
         retrieval_top_k=int(os.getenv("RETRIEVAL_TOP_K", "5")),
+        retrieval_hops=int(os.getenv("RETRIEVAL_HOPS", "2")),
+        retrieval_max_context_chars=int(os.getenv("RETRIEVAL_MAX_CONTEXT_CHARS", "8000")),
+        min_graph_context_chars=int(os.getenv("MIN_GRAPH_CONTEXT_CHARS", "200")),
+        embedding_model=os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
+        query_cache_ttl_seconds=int(os.getenv("QUERY_CACHE_TTL_SECONDS", "3600")),
+        query_cache_max_entries=int(os.getenv("QUERY_CACHE_MAX_ENTRIES", "1000")),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
     )
     logger.debug("Settings loaded: %s", _redact(settings))

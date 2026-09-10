@@ -54,24 +54,28 @@ invent new ones. Preserve exact step instructions as written.
 
 Node ids are prefixed by type, e.g. sop:unplanned_stop_handling, step:1,
 kpi:oee, businessrule:oee_aggregation_rule,
-domainconcept:planned_production_time. `id` is the ONLY property guaranteed
-to exist on every node — named properties were invented per-node by the
-extraction LLM and are only present on SOME nodes of a label, never all of
-them. Check the {schema} block above for which named properties actually
-occur on a label before relying on one.
+domainconcept:planned_production_time. `id`, `knowledge_name`,
+`knowledge_type`, and `description` are the ONLY properties guaranteed
+to exist on every node — every other named property was invented per-node
+by the extraction LLM and is only present on SOME nodes of a label, never
+all of them. Check the {schema} block above for which named properties
+actually occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
+Key properties that MAY additionally appear per label (use only if present in {schema}):
   SOP           -> purpose, applicable_area, prerequisites, warnings, expected_outcome
   Step          -> step_no, action, expected_result, decision_condition, exception_escalation
-  KPI           -> knowledge_name, kpi_name, business_purpose, description
-  BusinessRule  -> rule_name, condition, description
+  KPI           -> kpi_name, business_purpose
+  BusinessRule  -> rule_name, condition
   DomainConcept -> term, definition
   KnowledgeType -> name
 
-Always anchor the match on `id` first, then OR in any named properties from
-the list above that {schema} confirms exist for that label, e.g.:
+Anchor the match on `id` or `knowledge_name` first (both always exist), then
+OR in any named properties from the list above that {schema} confirms exist
+for that label, e.g.:
   WHERE toLower(s.id) CONTAINS toLower("unplanned stop")
-Never rely on a named property alone — always include the `id` CONTAINS check.
+     OR toLower(s.knowledge_name) CONTAINS toLower("unplanned stop")
+Never rely on a label-specific named property alone — always include the
+`id`/`knowledge_name` CONTAINS check.
 
 Relationships:
   (KnowledgeType)-[:HAS_SOP]->(SOP)

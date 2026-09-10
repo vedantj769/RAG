@@ -50,22 +50,24 @@ invent new ones. Preserve exact report/section names as written.
 ## Retrieval Notes
 
 Node ids are prefixed by type, e.g. report:daily_production_report,
-reportsection:summary, kpi:oee, query:shift_oee_lookup. `id` is the ONLY
-property guaranteed to exist on every node — named properties were invented
-per-node by the extraction LLM and are only present on SOME nodes of a
-label, never all of them. Check the {schema} block above for which named
-properties actually occur on a label before relying on one.
+reportsection:summary, kpi:oee, query:shift_oee_lookup. `id`,
+`knowledge_name`, `knowledge_type`, and `description` are the ONLY
+properties guaranteed to exist on every node — every other named property
+was invented per-node by the extraction LLM and is only present on SOME
+nodes of a label, never all of them. Check the {schema} block above for
+which named properties actually occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
-  Report        -> purpose, audience, filters, frequency, description
-  ReportSection -> section_name, description
-  KPI           -> knowledge_name, kpi_name, business_purpose, description
+Key properties that MAY additionally appear per label (use only if present in {schema}):
+  Report        -> purpose, audience, filters, frequency
+  ReportSection -> section_name
+  KPI           -> kpi_name, business_purpose
   Query         -> business_question, business_purpose, data_source, calculation_rule
   KnowledgeType -> name
 
-Always anchor the match on `id` first, then OR in any named properties from
-the list above that {schema} confirms exist for that label. Never rely on a
-named property alone — always include the `id` CONTAINS check.
+Anchor the match on `id` or `knowledge_name` first (both always exist), then
+OR in any named properties from the list above that {schema} confirms exist
+for that label. Never rely on a label-specific named property alone —
+always include the `id`/`knowledge_name` CONTAINS check.
 
 Relationships:
   (KnowledgeType)-[:HAS_REPORT]->(Report)

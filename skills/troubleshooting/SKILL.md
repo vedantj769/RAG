@@ -62,26 +62,30 @@ invent new ones. Preserve exact symptom/cause/action text as written.
 Node ids are prefixed by type, e.g.
 troubleshootingcase:machine_not_running, kpi:oee,
 table:shift_oee_details_for_workcenter, businessrule:oee_aggregation_rule,
-sop:unplanned_stop_handling, query:shift_oee_lookup.
-`id` is the ONLY property guaranteed to exist on every node — named
-properties were invented per-node by the extraction LLM and are only present
-on SOME nodes of a label, never all of them. Check the {schema} block above
-for which named properties actually occur on a label before relying on one.
+sop:unplanned_stop_handling, query:shift_oee_lookup. `id`, `knowledge_name`,
+`knowledge_type`, and `description` are the ONLY properties guaranteed to
+exist on every node — every other named property was invented per-node by
+the extraction LLM and is only present on SOME nodes of a label, never all
+of them. Check the {schema} block above for which named properties actually
+occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
-  TroubleshootingCase -> symptom, description, possible_causes, diagnostic_checks, corrective_action, escalation, expected_outcome
-  KPI                 -> knowledge_name, kpi_name, business_purpose, description
-  Table               -> model_name, business_name, description, database, schema
-  BusinessRule        -> rule_name, condition, description
+Key properties that MAY additionally appear per label (use only if present in {schema}):
+  TroubleshootingCase -> symptom, possible_causes, diagnostic_checks, corrective_action, escalation, expected_outcome
+  KPI                 -> kpi_name, business_purpose
+  Table               -> model_name, business_name, database, schema
+  BusinessRule        -> rule_name, condition
   SOP                 -> purpose, applicable_area, expected_outcome
   Query               -> business_question, business_purpose, data_source, calculation_rule
   KnowledgeType       -> name
 
-Always anchor the match on `id` first, then OR in any named properties from
-the list above that {schema} confirms exist for that label, e.g.:
+Anchor the match on `id` or `knowledge_name` first (both always exist), then
+OR in any named properties from the list above that {schema} confirms exist
+for that label, e.g.:
   WHERE toLower(t.id) CONTAINS toLower("machine not running")
+     OR toLower(t.knowledge_name) CONTAINS toLower("machine not running")
      OR toLower(t.symptom) CONTAINS toLower("machine not running")
-Never rely on a named property alone — always include the `id` CONTAINS check.
+Never rely on a label-specific named property alone — always include the
+`id`/`knowledge_name` CONTAINS check.
 
 Relationships:
   (KnowledgeType)-[:HAS_CASE]->(TroubleshootingCase)

@@ -22,8 +22,17 @@ ENTITY_FULLTEXT_INDEX = "entity_fulltext_index"
 # How far (and how wide) the structured retriever expands around a matched entity.
 # Extraction schemas can invent many relationship types (e.g. HAS_FORMULA, USES_VARIABLE),
 # so we walk any relationship type/direction rather than hand-picking specific hops.
-DEFAULT_SUBGRAPH_HOPS = 3
+#
+# Depth is kept small and fixed rather than tuned per-question: every skill schema's own
+# definitional chain (KPI->Formula, KPI->Variable->DataFeature/SemanticDefinition, etc.)
+# resolves fully within 2 hops of the anchor. A 3rd hop mostly reaches *cross-topic*
+# fan-out through nodes shared by many skills (Table, BusinessRule, KPI, DomainConcept),
+# whose neighbor count - and therefore token cost - is unbounded and unpredictable. So
+# hops stays at 2, and `DEFAULT_MAX_CONTEXT_CHARS` is the real backstop on token usage:
+# it caps output size regardless of how wide the matched graph region turns out to be.
+DEFAULT_SUBGRAPH_HOPS = 2
 DEFAULT_SUBGRAPH_PATHS = 25
+DEFAULT_MAX_CONTEXT_CHARS = 8000
 
 _LUCENE_SPECIAL_CHARS = set('+-&|!(){}[]^"~*?:\\/')
 
@@ -126,8 +135,12 @@ def _match_entity_ids(graph: Neo4jGraph, entity: str, limit: int) -> list[str]:
     return [row["id"] for row in rows]
 
 
-def _match_entities(graph: Neo4jGraph, entities: list[str], limit: int) -> list[str]:
-    """Resolve extracted entity names to graph node ids, deduplicated and order-preserved."""
+def match_entities(graph: Neo4jGraph, entities: list[str], limit: int) -> list[str]:
+    """Resolve extracted entity names to graph node ids, deduplicated and order-preserved.
+
+    Public (no leading underscore) so callers outside this module - e.g. the query
+    router - can resolve anchors themselves without duplicating this matching logic.
+    """
     node_ids: list[str] = []
     for entity in entities:
         node_ids.extend(_match_entity_ids(graph, entity, limit))
@@ -164,6 +177,7 @@ def structured_retriever(
     node_ids: list[str],
     hops: int = DEFAULT_SUBGRAPH_HOPS,
     limit: int = DEFAULT_SUBGRAPH_PATHS,
+    max_chars: int = DEFAULT_MAX_CONTEXT_CHARS,
 ) -> str:
     """Return a text description of each entity's connected subgraph, properties included.
 
@@ -171,15 +185,28 @@ def structured_retriever(
     hand-picking specific relationship types - so nothing is missed regardless of how
     the extraction schema grows. `Document` nodes (linked via `MENTIONS`) are excluded
     since they hold raw source text, not graph facts; see `source_text_retriever` for that.
+
+    `max_chars` splits an overall character budget evenly across every matched entity
+    (`node_ids`), truncating each entity's own description list independently. This
+    keeps token usage bounded and predictable no matter how wide any single entity's
+    neighborhood turns out to be, while still guaranteeing every matched entity gets
+    some representation instead of the first one consuming the whole budget.
     """
+    if not node_ids:
+        return ""
+    budget_per_node = max(max_chars // len(node_ids), 500)
+
     descriptions: list[str] = []
     for node_id in node_ids:
+        node_descriptions: list[str] = []
+        node_chars = 0
+
         anchor_rows = graph.query(
             "MATCH (anchor:__Entity__ {id: $node_id}) "
             "RETURN labels(anchor) AS labels, properties(anchor) AS properties",
             {"node_id": node_id},
         )
-        descriptions.extend(_describe_node(row["labels"], row["properties"]) for row in anchor_rows)
+        node_descriptions.extend(_describe_node(row["labels"], row["properties"]) for row in anchor_rows)
 
         rows = graph.query(
             f"""
@@ -195,7 +222,15 @@ def structured_retriever(
             """,
             {"node_id": node_id, "limit": limit},
         )
-        descriptions.extend(_describe_path(row["chain_nodes"], row["chain_rels"]) for row in rows)
+        node_descriptions.extend(_describe_path(row["chain_nodes"], row["chain_rels"]) for row in rows)
+
+        # Truncate this entity's own descriptions once its share of the budget is spent,
+        # rather than cutting off after the fact - so every matched entity is represented.
+        for description in node_descriptions:
+            node_chars += len(description)
+            if node_chars > budget_per_node:
+                break
+            descriptions.append(description)
 
     return "\n".join(dict.fromkeys(descriptions))
 
@@ -217,20 +252,28 @@ def source_text_retriever(graph: Neo4jGraph, node_ids: list[str], limit: int = 3
     return "\n\n".join(dict.fromkeys(chunks))
 
 
-def retrieve_context(graph: Neo4jGraph, llm: BaseLanguageModel, question: str, limit: int = 5) -> str:
+def retrieve_context(
+    graph: Neo4jGraph,
+    llm: BaseLanguageModel,
+    question: str,
+    limit: int = 5,
+    hops: int = DEFAULT_SUBGRAPH_HOPS,
+    max_context_chars: int = DEFAULT_MAX_CONTEXT_CHARS,
+) -> str:
     """Combine graph relationship triples and source chunk text into one context string.
 
     `limit` bounds how many candidate graph entities are matched per extracted name;
-    the subgraph expansion depth/width around each matched entity is controlled
-    separately by `DEFAULT_SUBGRAPH_HOPS`/`DEFAULT_SUBGRAPH_PATHS`.
+    `hops` bounds subgraph expansion depth around each matched entity, and
+    `max_context_chars` caps the total size of the relationship section - see
+    `structured_retriever` for why depth alone can't bound token usage reliably.
     """
     entities = extract_entities(llm, question)
-    node_ids = _match_entities(graph, entities, limit)
+    node_ids = match_entities(graph, entities, limit)
     if not node_ids:
         logger.warning("No graph entities matched for question: %s (entities: %s)", question, entities)
         return ""
 
-    relationships = structured_retriever(graph, node_ids)
+    relationships = structured_retriever(graph, node_ids, hops=hops, max_chars=max_context_chars)
     source_text = source_text_retriever(graph, node_ids, limit)
 
     sections = []
@@ -241,14 +284,31 @@ def retrieve_context(graph: Neo4jGraph, llm: BaseLanguageModel, question: str, l
     return "\n\n".join(sections)
 
 
-def answer_question(graph: Neo4jGraph, llm: BaseLanguageModel, question: str, top_k: int = 5) -> str:
+def generate_answer(llm: BaseLanguageModel, question: str, context: str) -> str:
+    """Answer a question from already-retrieved context text.
+
+    Split out of `answer_question` so other callers - e.g. the query router, which
+    may combine graph context with vector-search context - can reuse the same answer
+    prompt without duplicating it.
+    """
+    chain = _ANSWER_PROMPT | llm
+    response = chain.invoke({"question": question, "context": context})
+    return response.content
+
+
+def answer_question(
+    graph: Neo4jGraph,
+    llm: BaseLanguageModel,
+    question: str,
+    top_k: int = 5,
+    hops: int = DEFAULT_SUBGRAPH_HOPS,
+    max_context_chars: int = DEFAULT_MAX_CONTEXT_CHARS,
+) -> str:
     """Retrieve graph context for the question and use the LLM to produce a final answer."""
     ensure_entity_fulltext_index(graph)
-    context = retrieve_context(graph, llm, question, top_k)
+    context = retrieve_context(graph, llm, question, top_k, hops=hops, max_context_chars=max_context_chars)
     if not context:
         logger.warning("No graph context found for question: %s", question)
         context = "No relevant information was found in the graph."
 
-    chain = _ANSWER_PROMPT | llm
-    response = chain.invoke({"question": question, "context": context})
-    return response.content
+    return generate_answer(llm, question, context)

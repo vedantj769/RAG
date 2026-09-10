@@ -48,22 +48,24 @@ logic text as written.
 ## Retrieval Notes
 
 Node ids are prefixed by type, e.g. lineageflow:production_events_to_oee,
-table:production_events, kpi:oee. `id` is the ONLY property guaranteed to
-exist on every node — named properties were invented per-node by the
-extraction LLM and are only present on SOME nodes of a label, never all of
-them. Check the {schema} block above for which named properties actually
-occur on a label before relying on one.
+table:production_events, kpi:oee. `id`, `knowledge_name`, `knowledge_type`,
+and `description` are the ONLY properties guaranteed to exist on every node
+— every other named property was invented per-node by the extraction LLM
+and is only present on SOME nodes of a label, never all of them. Check the
+{schema} block above for which named properties actually occur on a label
+before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
+Key properties that MAY additionally appear per label (use only if present in {schema}):
   LineageFlow   -> transformation_logic, notes
-  Table         -> model_name, business_name, description, database, schema
+  Table         -> model_name, business_name, database, schema
   Field         -> data_type, business_meaning, notes
-  KPI           -> knowledge_name, kpi_name, business_purpose, description
+  KPI           -> kpi_name, business_purpose
   KnowledgeType -> name
 
-Always anchor the match on `id` first, then OR in any named properties from
-the list above that {schema} confirms exist for that label. Never rely on a
-named property alone — always include the `id` CONTAINS check.
+Anchor the match on `id` or `knowledge_name` first (both always exist), then
+OR in any named properties from the list above that {schema} confirms exist
+for that label. Never rely on a label-specific named property alone —
+always include the `id`/`knowledge_name` CONTAINS check.
 
 Relationships:
   (KnowledgeType)-[:HAS_LINEAGE]->(LineageFlow)

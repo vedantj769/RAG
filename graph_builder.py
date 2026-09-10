@@ -72,8 +72,9 @@ def main() -> int:
             allowed_relationships=skill.allowed_relationships,
             node_properties=True,
             additional_instructions=skill.prompt,
+            knowledge_type=knowledge_type,
         )
-        graph_documents.extend(extract_graph_documents(transformer, chunks))
+        graph_documents.extend(extract_graph_documents(transformer, chunks, knowledge_type=knowledge_type))
 
     graph = build_neo4j_graph(
         settings.neo4j_uri,

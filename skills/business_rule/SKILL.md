@@ -49,23 +49,27 @@ invent new ones. Preserve exact rule names and formulas as written.
 ## Retrieval Notes
 
 Node ids are prefixed by type, e.g. businessrule:oee_aggregation_rule,
-kpi:oee, table:shift_oee_details_for_workcenter. `id` is the ONLY property
-guaranteed to exist on every node — named properties were invented per-node
-by the extraction LLM and are only present on SOME nodes of a label, never
-all of them. Check the {schema} block above for which named properties
-actually occur on a label before relying on one.
+kpi:oee, table:shift_oee_details_for_workcenter. `id`, `knowledge_name`,
+`knowledge_type`, and `description` are the ONLY properties guaranteed to
+exist on every node — every other named property was invented per-node by
+the extraction LLM and is only present on SOME nodes of a label, never all
+of them. Check the {schema} block above for which named properties actually
+occur on a label before relying on one.
 
-Key properties that MAY appear per label (use only if present in {schema}):
-  BusinessRule  -> rule_name, condition, action, calculation, threshold, exception, priority, applicable_domain, applicable_hierarchy, effective_date, description
-  KPI           -> knowledge_name, kpi_name, business_purpose, unit, calculation_frequency, description
-  Table         -> model_name, business_name, description, database, schema, business_key, granularity
+Key properties that MAY additionally appear per label (use only if present in {schema}):
+  BusinessRule  -> rule_name, condition, action, calculation, threshold, exception, priority, applicable_domain, applicable_hierarchy, effective_date
+  KPI           -> kpi_name, unit, calculation_frequency
+  Table         -> model_name, business_name, database, schema, business_key, granularity
   KnowledgeType -> name
 
-Always anchor the match on `id` first, then OR in any named properties from
-the list above that {schema} confirms exist for that label, e.g.:
+Anchor the match on `id` or `knowledge_name` first (both always exist), then
+OR in any named properties from the list above that {schema} confirms exist
+for that label, e.g.:
   WHERE toLower(r.id) CONTAINS toLower("long stop")
+     OR toLower(r.knowledge_name) CONTAINS toLower("long stop")
      OR toLower(r.rule_name) CONTAINS toLower("long stop")
-Never rely on a named property alone — always include the `id` CONTAINS check.
+Never rely on a label-specific named property alone — always include the
+`id`/`knowledge_name` CONTAINS check.
 
 Relationships:
   (KnowledgeType)-[:HAS_RULE]->(BusinessRule)

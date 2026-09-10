@@ -132,11 +132,12 @@ Node ids across every skill are prefixed by type, e.g. `kpi:oee`,
 `table:shift_oee_details_for_workcenter`,
 `businessrule:oee_aggregation_rule`, `domainconcept:planned_production_time`,
 `sop:unplanned_stop_handling`, `troubleshootingcase:machine_not_running`.
-`id` is the ONLY property guaranteed to exist on every node — each
-extraction skill's LLM invents its own named properties per node, so check
-the {schema} block above for which named properties actually occur on a
-label before relying on one; see each skill's own SKILL.md for its
-label-specific property list.
+`id`, `knowledge_name`, `knowledge_type`, and `description` are the ONLY
+properties guaranteed to exist on every node across every skill — each
+extraction skill's LLM invents its own additional named properties per
+node, so check the {schema} block above for which of those actually occur
+on a label before relying on one; see each skill's own SKILL.md for its
+label-specific optional property list.
 
 This is the schema to consult when a question doesn't obviously belong to
 one skill, or when it spans several (e.g. "why is OEE dropping and what SOP
